@@ -1,0 +1,7 @@
+"0","data_without_outliers <- data"
+"0","data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_60'),]"
+"0","data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_70'),]"
+"0","data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_55'),]"
+"0","data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_72'),]"
+"0","data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_37'),]"
+"0",""

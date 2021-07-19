@@ -1,0 +1,2 @@
+"0","data %>%"
+"0","  cohens_d(avg_memory_util ~ velocity_samples)"

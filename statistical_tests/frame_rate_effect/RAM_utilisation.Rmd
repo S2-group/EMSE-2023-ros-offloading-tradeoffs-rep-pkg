@@ -1,0 +1,100 @@
+---
+title: "Effect of camera frame rate parameter on the average memory utilisation"
+output:
+  html_notebook: default
+---
+
+We need to analyse the impact of two possible values of camera frame rate on the average memory utilisation. We have chosen two values for frame rate, namely, `20fps`, which is used in the primary experiments, and three times higher frame rate, `60fps`. First, let us load the necessary libraries:
+```{r}
+if (!require('tidyverse')) install.packages('tidyverse', dependencies = TRUE); library('tidyverse')
+if (!require('ggpubr')) install.packages('ggpubr', dependencies = TRUE); library('ggpubr')
+if (!require('rstatix')) install.packages('rstatix', dependencies = TRUE); library('rstatix')
+if (!require('ggplot2')) install.packages('ggplot2', dependencies = TRUE); library('ggplot2')
+```
+
+Next, we load the raw data output of the performed experiment:
+```{r}
+data <- read.csv(file = '../../raw_data/test_frame_rate/run_table.csv')
+data$avg_memory_util <- data$avg_memory_util / 1000000
+data <- subset(data, select = c(X__run_id, frame_rate, avg_memory_util))
+data$frame_rate <- as.factor(data$frame_rate)
+data$avg_memory_util <- as.numeric(data$avg_memory_util)
+```
+
+Mean and standard deviation of the average memory utilisation for both frame rates are displayed in the summary below:
+```{r}
+data %>%
+  group_by(frame_rate) %>%
+  get_summary_stats(avg_memory_util, type = "mean_sd")
+```
+
+We can visualize the distribution of the data for both frame rate treatments via boxplot below:
+```{r}
+pdf(file = "../../figures/frame_rate_effect/ram-utilisation.pdf")
+
+ggplot(data, aes(x = frame_rate, y = avg_memory_util, fill = frame_rate)) +
+  theme_bw() + 
+  geom_boxplot(width = 0.9, outlier.size = 0.5) + 
+  stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5, size = 1.5) +
+  labs(x = "Frame rate (fps)", y = "Average memory utilisation (MB)") +
+  theme(legend.position = 'none') +
+  theme(
+    axis.title.x = element_text(size = 30, family = 'sans'),
+    axis.title.y = element_text(size = 30, family = 'sans'),
+    axis.text.x = element_text(size = 30, family = 'sans'),
+    axis.text.y = element_text(size = 30, family = 'sans'),
+    
+  )
+
+dev.off()
+```
+
+# Welch's t-test
+
+We will apply the Welch's t-test to compare the means of both treatments. This is the default t-test in R and the safer alternative to standard Student's t-test, when we cannot assume that variances of both treatments are equal. However, we still need to check if other assumptions for applying this test are met. The first assumption of having independent observations, i.e. each subject belongs to only one group and there are no relationships between observations within the two groups, is satisfied inherently by the very way in which the experiment is conducted.
+
+## No significant outliers
+
+Next assumption that we need to check is if there are no significant outliers in neither of the two groups:
+```{r}
+data %>% 
+  group_by(frame_rate) %>%
+  identify_outliers(avg_memory_util)
+```
+
+As the result above shows, there are indeed no significant outliers thus we can proceed with other assumptions.
+
+## Normality
+
+Next, we need to check if data in both groups stem from a normal distribution. To do so, we first need to draw QQ-plot for both groups:
+```{r}
+ggqqplot(data, x = "avg_memory_util", facet.by = "frame_rate")
+```
+Data points on both figures seem to be almost aligned alongside the respective reference lines, with some exceptions on both edges, hence we may assume that normality assumption is satisfied for both resolution treatment groups. Nevertheless, we need to perform Shapiro-Wilk test for each group to confirm the assumptions drawn from the QQ-plots:
+```{r}
+data %>%
+  group_by(frame_rate) %>%
+  shapiro_test(avg_memory_util)
+```
+As the results of the test show, p-values for both groups are higher than `0.05` reference value (`p = 0.684` and `p = 0.471`, respectfully), which means that we cannot reject the null-hypothesis stating that the data within both groups are normally distributed. Hereby, we conclude that the normality assumption for both groups is satisfied.
+
+## Computation
+
+Since we established that there are no extreme outliers and the data for both groups is normally distributed, we can proceed with the execution of Welch's t-test:
+```{r}
+data %>%
+  t_test(avg_memory_util ~ frame_rate) %>%
+  add_significance()
+```
+The resulting p-value of $0.00395$ is lower than `0.05` reference value for the `0.95` confidence interval. This means that the obtained p-value is statistically significant and we can reject $H_0$, which states that the means of the average memory utilisation for both frame rate values are equal. We can hereby conclude that camera frame rate parameter has a statistically significant effect on the average memory utilisation.
+
+## Effect size
+
+We established with Welch's t-test result that camera frame rate parameter has a statistically significant effect on the average memory utilisation. Now we need to perform Cohen's d test to estimate the magnitude of the said effect:
+
+```{r}
+data %>%
+  cohens_d(avg_memory_util ~ frame_rate)
+```
+The resulting effect size of `d = -1.477534` is interpreted as _large_ in R, according to the Cohen's rule of thumb^[http://www.utstat.toronto.edu/~brunner/oldclass/378f16/readings/CohenPower.pdf]. According to the new and extended rules of thumb defined by Sawilowsky, the magnitude for this d-value is considered as _very large_^[https://digitalcommons.wayne.edu/cgi/viewcontent.cgi?article=1536&context=jmasm]. This is indeed clear from the distribution of data for both treatments in the boxplot above, where we can see that the average memory utilisation mean for `20fps` resolution is `876487269 B`, while it is `877536065 B` for `60fps`. The resulting d-value is negative since the mean of the `20fps` resolution group is lower than the mean of `60fps` group.
+

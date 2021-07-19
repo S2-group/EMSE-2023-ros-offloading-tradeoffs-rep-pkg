@@ -1,0 +1,4 @@
+"0","data <- read.csv(file = '../../raw_data/test_resolution/run_table.csv')"
+"0","data <- subset(data, select = c(X__run_id, resolution, recognition_ratio))"
+"0","data$resolution <- factor(data$resolution, levels = c(""640x480"", ""1280x960""))"
+"0","data$recognition_ratio <- as.numeric(data$recognition_ratio)"

@@ -1,0 +1,6 @@
+"0","if (!require('tidyverse')) install.packages('tidyverse', dependencies = TRUE); library('tidyverse')"
+"0","if (!require('ggpubr')) install.packages('ggpubr', dependencies = TRUE); library('ggpubr')"
+"0","if (!require('rstatix')) install.packages('rstatix', dependencies = TRUE); library('rstatix')"
+"0","if (!require('ggplot2')) install.packages('ggplot2', dependencies = TRUE); library('ggplot2')"
+"0","if (!require('lmPerm')) install.packages('lmPerm', dependencies = TRUE); library('lmPerm')"
+"0","if (!require('emmeans')) install.packages('emmeans', dependencies = TRUE); library('emmeans')"

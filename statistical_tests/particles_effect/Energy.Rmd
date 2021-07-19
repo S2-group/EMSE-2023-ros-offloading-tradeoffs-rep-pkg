@@ -1,0 +1,97 @@
+---
+title: "Effect of the number of SLAM filter particles parameter on the total energy consumption"
+output:
+  html_notebook: default
+---
+
+We need to analyse the impact of two possible values for the number of SLAM filter particles on the total energy consumption. We have chosen two values for the number of particles, namely, `5`, which is used in the primary experiments, and `30`, which is the default value in Gmapping ROS package. First, let us load the necessary libraries:
+```{r}
+if (!require('tidyverse')) install.packages('tidyverse', dependencies = TRUE); library('tidyverse')
+if (!require('ggpubr')) install.packages('ggpubr', dependencies = TRUE); library('ggpubr')
+if (!require('rstatix')) install.packages('rstatix', dependencies = TRUE); library('rstatix')
+if (!require('ggplot2')) install.packages('ggplot2', dependencies = TRUE); library('ggplot2')
+```
+
+Next, we load the raw data output of the performed experiment:
+```{r}
+data <- read.csv(file = '../../raw_data/test_particles/run_table.csv')
+data <- subset(data, select = c(X__run_id, particles, energy_J))
+data$particles <- as.factor(data$particles)
+data$energy_J <- as.numeric(data$energy_J)
+```
+
+Mean and standard deviation of the total energy consumption for both particle number values are displayed in the summary below:
+```{r}
+data %>%
+  group_by(particles) %>%
+  get_summary_stats(energy_J, type = "mean_sd")
+```
+
+We can visualize the distribution of the data for both particle number treatments via boxplot below:
+```{r}
+pdf(file = "../../figures/particles_effect/energy.pdf")
+
+ggplot(data, aes(x = particles, y = energy_J, fill = particles)) +
+  theme_bw() + 
+  geom_boxplot(width = 0.9, outlier.size = 0.5) + 
+  stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5, size = 1.5) +
+  labs(x = "Number of SLAM filter particles (#)", y = "Total energy consumption (J)") +
+  theme(legend.position = 'none') +
+  theme(
+    axis.title.x = element_text(size = 26, family = 'sans'),
+    axis.title.y = element_text(size = 26, family = 'sans'),
+    axis.text.x = element_text(size = 24, family = 'sans'),
+    axis.text.y = element_text(size = 24, family = 'sans')
+  )
+
+dev.off()
+```
+
+# Welch's t-test
+
+We will apply the Welch's t-test to compare the means of both treatments. This is the default t-test in R and the safer alternative to standard Student's t-test, when we cannot assume that variances of both treatments are equal. However, we still need to check if other assumptions for applying this test are met. The first assumption of having independent observations, i.e. each subject belongs to only one group and there are no relationships between observations within the two groups, is satisfied inherently by the very way in which the experiment is conducted.
+
+## No significant outliers
+
+Next assumption that we need to check is if there are no significant outliers in neither of the two groups:
+```{r}
+data %>% 
+  group_by(particles) %>%
+  identify_outliers(energy_J)
+```
+
+As the result above shows, there are two outliers, for runs 4 and 11, respectfully, but neither is considered as extreme in terms of statistical significance. We can proceed with other assumptions.
+
+## Normality
+
+Next, we need to check if data in both groups stem from a normal distribution. To do so, we first need to draw QQ-plot for both groups:
+```{r}
+ggqqplot(data, x = "energy_J", facet.by = "particles")
+```
+Data points on both figures seem to be slightly scattered around the reference line so we cannot confirm with a great certainty that the data in either of the particle number treatment groups is normally distributed. This is why we need to perform Shapiro-Wilk test for both groups to complement QQ-plots:
+```{r}
+data %>%
+  group_by(particles) %>%
+  shapiro_test(energy_J)
+```
+As the results of the test show, p-values for both groups are higher than `0.05` reference value (`p = 0.062` and `p = 0.827`, respectfully), which means that we cannot reject the null-hypothesis stating that the data within both groups are normally distributed. Hereby, we conclude that the normality assumption for both groups is satisfied.
+
+## Computation
+
+Since we established that there are no extreme outliers and the data for both groups is normally distributed, we can proceed with the execution of Welch's t-test:
+```{r}
+data %>%
+  t_test(energy_J ~ particles) %>%
+  add_significance()
+```
+The resulting p-value of $0.00128$ is lower than `0.05` reference value for the `0.95` confidence interval. This means that the obtained p-value is statistically significant and we can reject $H_0$, which states that the means of the total energy consumption for both particles number values are equal. We can hereby conclude that the number of filter particles parameter has a statistically significant effect on the total energy consumption.
+
+## Effect size
+
+We established with Welch's t-test result that the particle number parameter has a statistically significant effect on the total energy consumption. Now we need to perform Cohen's d test to estimate the magnitude of the said effect:
+
+```{r}
+data %>%
+  cohens_d(energy_J ~ particles)
+```
+The resulting effect size of `d = -1.708923` is interpreted as _large_ in R, according to the Cohen's rule of thumb^[http://www.utstat.toronto.edu/~brunner/oldclass/378f16/readings/CohenPower.pdf]. According to the new and extended rules of thumb defined by Sawilowsky, the magnitude for this d-value is considered as _very large_^[https://digitalcommons.wayne.edu/cgi/viewcontent.cgi?article=1536&context=jmasm]. This is indeed clear from the distribution of data for both treatments in the boxplot above, where we can see that the total energy consumption mean for `5` particles is `4329.966	J`, while it is `4541.058 J` for `30` particles. The resulting d-value is negative since the total energy consumption mean for `5` particles group is lower than the one for `10` particles. 

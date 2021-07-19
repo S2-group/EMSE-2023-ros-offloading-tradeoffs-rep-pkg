@@ -1,0 +1,86 @@
+---
+title: "Effect of the number of velocity samples parameter on the total mission execution time"
+output:
+  html_notebook: default
+---
+
+We need to analyse the impact of two possible values for the number of velocity samples on the total mission execution time. We have chosen two values for the number of velocity samples, namely, `10x20`, i.e. `10` translation and `20` rotation velocities, which is used in the primary experiments, and `20x40`, i.e. `20` translation and `40` rotation velocities. First, let us load the necessary libraries:
+```{r}
+if (!require('tidyverse')) install.packages('tidyverse', dependencies = TRUE); library('tidyverse')
+if (!require('ggpubr')) install.packages('ggpubr', dependencies = TRUE); library('ggpubr')
+if (!require('rstatix')) install.packages('rstatix', dependencies = TRUE); library('rstatix')
+if (!require('ggplot2')) install.packages('ggplot2', dependencies = TRUE); library('ggplot2')
+```
+
+Next, we load the raw data output of the performed experiment:
+```{r}
+data <- read.csv(file = '../../raw_data/test_velocity_samples/run_table.csv')
+data <- subset(data, select = c(X__run_id, velocity_samples, mission_execution_s))
+data$velocity_samples <- as.factor(data$velocity_samples)
+data$mission_execution_s <- as.numeric(data$mission_execution_s)
+```
+
+Mean and standard deviation of the total mission execution time for both number of velocity samples values are displayed in the summary below:
+```{r}
+data %>%
+  group_by(velocity_samples) %>%
+  get_summary_stats(mission_execution_s, type = "mean_sd")
+```
+
+We can visualize the distribution of the data for both velocity samples treatments via boxplot below:
+```{r}
+ggplot(data, aes(x = velocity_samples, y = mission_execution_s, fill = velocity_samples)) +
+  theme_bw() + 
+  geom_boxplot(width = 0.5, outlier.size = 0.5) + 
+  geom_jitter(width = 0.2) +
+  stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5, size = 1.5) +
+  labs(x = "Number of translation and rotation velocity samples (#)", y = "Total mission execution (s)") +
+  theme(legend.position = 'none') +
+  theme(
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
+    
+  )
+```
+
+# Welch's t-test
+
+We will apply the Welch's t-test to compare the means of both treatments. This is the default t-test in R and the safer alternative to standard Student's t-test, when we cannot assume that variances of both treatments are equal. However, we still need to check if other assumptions for applying this test are met. The first assumption of having independent observations, i.e. each subject belongs to only one group and there are no relationships between observations within the two groups, is satisfied inherently by the very way in which the experiment is conducted.
+
+## No significant outliers
+
+Next assumption that we need to check is if there are no significant outliers in neither of the two groups:
+```{r}
+data %>% 
+  group_by(velocity_samples) %>%
+  identify_outliers(mission_execution_s)
+```
+
+As the result above shows, there are two outliers, for runs 8 and 9, respectfully, but none of them is not considered extreme in terms of statistical significance. We can proceed with other assumptions.
+
+## Normality
+
+Next, we need to check if data in both groups stem from a normal distribution. To do so, we first need to draw QQ-plot for both groups:
+```{r}
+ggqqplot(data, x = "mission_execution_s", facet.by = "velocity_samples")
+```
+Data points on both figures seem to be slightly scattered around the reference line so we cannot confirm with a great certainty that the data in either of the velocity samples treatment groups is normally distributed. This is why we need to perform Shapiro-Wilk test for both groups to complement QQ-plots:
+```{r}
+data %>%
+  group_by(velocity_samples) %>%
+  shapiro_test(mission_execution_s)
+```
+As the results of the test show, p-values for both groups are higher than `0.05` reference value (`p = 0.076` and `p = 0.520`, respectfully), which means that we cannot reject the null-hypothesis stating that the data within both groups are normally distributed. Hereby, we conclude that the normality assumption for both groups is satisfied.
+
+## Computation
+
+Since we established that there are no extreme outliers and the data for both groups is normally distributed, we can proceed with the execution of Welch's t-test:
+```{r}
+data %>%
+  t_test(mission_execution_s ~ velocity_samples) %>%
+  add_significance()
+```
+The resulting p-value of `0.342` is higher than `0.05` reference value for the `0.95` confidence interval. This means that the obtained p-value is not statistically significant and we cannot reject $H_0$, which states that the means of the total mission execution time for both number of velocity samples values are equal. We can hereby conclude that the number of velocity samples parameter does not have a statistically significant effect on the total mission execution time.
+

@@ -1,0 +1,8 @@
+"0","model <- lm(num_of_packets ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data)"
+"0","data %>%"
+"0","  group_by(obj_recognition_offloaded) %>%"
+"0","  anova_test(num_of_packets ~  amcl_offloaded*navigation_offloaded, error = model)"
+"2","Coefficient covariances computed by hccm()
+"
+"2","Coefficient covariances computed by hccm()
+"

@@ -1,0 +1,3 @@
+"0","data %>%"
+"0","  t_test(avg_navigation_time_ms ~ temporal_updates) %>%"
+"0","  add_significance()"

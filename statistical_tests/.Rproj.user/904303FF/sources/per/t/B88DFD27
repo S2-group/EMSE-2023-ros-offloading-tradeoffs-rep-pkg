@@ -1,0 +1,27 @@
+{
+    "id": "B88DFD27",
+    "path": "~/offloading_experiment_results/statistical_tests/resolution_effect/RAM_utilisation.Rmd",
+    "project_path": "resolution_effect/RAM_utilisation.Rmd",
+    "type": "r_markdown",
+    "hash": "1107305352",
+    "contents": "",
+    "dirty": false,
+    "created": 1626587456917.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "chunk_output_type": "inline",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "48,8",
+        "scrollLine": "29"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1626587477,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1626587477314,
+    "read_only": false,
+    "read_only_alternatives": []
+}

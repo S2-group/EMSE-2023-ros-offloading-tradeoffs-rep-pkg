@@ -1,0 +1,100 @@
+---
+title: "Effect of the simulation time parameter on the average navigation time"
+output:
+  html_notebook: default
+---
+
+We need to analyse the impact of two possible values for the simulation time on the average navigation time. We have chosen two values for the simulation time, namely, `1.5 s`, which is used in the primary experiments, and two times higher value, `3 s`. First, let us load the necessary libraries:
+```{r}
+if (!require('tidyverse')) install.packages('tidyverse', dependencies = TRUE); library('tidyverse')
+if (!require('ggpubr')) install.packages('ggpubr', dependencies = TRUE); library('ggpubr')
+if (!require('rstatix')) install.packages('rstatix', dependencies = TRUE); library('rstatix')
+if (!require('ggplot2')) install.packages('ggplot2', dependencies = TRUE); library('ggplot2')
+```
+
+Next, we load the raw data output of the performed experiment:
+```{r}
+data <- read.csv(file = '../../raw_data/test_sim_period/run_table.csv')
+data$avg_navigation_time <- (data$avg_goal_sending_delay_ms + data$avg_goal_processing_s*1000 + data$avg_nav_result_delay_ms) / 1000
+data <- subset(data, select = c(X__run_id, sim_period, avg_navigation_time))
+data$sim_period <- as.factor(data$sim_period)
+data$avg_navigation_time <- as.numeric(data$avg_navigation_time)
+```
+
+Mean and standard deviation of the average navigation time for both simulation time values are displayed in the summary below:
+```{r}
+data %>%
+  group_by(sim_period) %>%
+  get_summary_stats(avg_navigation_time, type = "mean_sd")
+```
+
+We can visualize the distribution of the data for both simulation time treatments via boxplot below:
+```{r}
+pdf(file = "../../figures/sim_time_effect/navigation-time.pdf")
+
+ggplot(data, aes(x = sim_period, y = avg_navigation_time, fill = sim_period)) +
+  theme_bw() + 
+  geom_boxplot(width = 0.9, outlier.size = 0.5) + 
+  stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5, size = 1.5) +
+  labs(x = "Simulation time (s)", y = "Average navigation time (s)") +
+  theme(legend.position = 'none') +
+  theme(
+    axis.title.x = element_text(size = 26, family = 'sans'),
+    axis.title.y = element_text(size = 26, family = 'sans'),
+    axis.text.x = element_text(size = 24, family = 'sans'),
+    axis.text.y = element_text(size = 24, family = 'sans'),
+    
+  )
+
+dev.off()
+```
+
+# Welch's t-test
+
+We will apply the Welch's t-test to compare the means of both treatments. This is the default t-test in R and the safer alternative to standard Student's t-test, when we cannot assume that variances of both treatments are equal. However, we still need to check if other assumptions for applying this test are met. The first assumption of having independent observations, i.e. each subject belongs to only one group and there are no relationships between observations within the two groups, is satisfied inherently by the very way in which the experiment is conducted.
+
+## No significant outliers
+
+Next assumption that we need to check is if there are no significant outliers in neither of the two groups:
+```{r}
+data %>% 
+  group_by(sim_period) %>%
+  identify_outliers(avg_navigation_time)
+```
+
+As the result above shows, there are indeed no significant outliers thus we can proceed with other assumptions.
+
+## Normality
+
+Next, we need to check if data in both groups stem from a normal distribution. To do so, we first need to draw QQ-plot for both groups:
+```{r}
+ggqqplot(data, x = "avg_navigation_time", facet.by = "sim_period")
+```
+Data points on the left figure, for `1.5 s` simulation time treatment, seem to be aligned with the reference line thus indicating that the data in this group is normally distributed. However, we cannot confirm so with a great certainty for the `3 s` treatment group, since the data seems to be slightly scattered around the reference line on the right figure. This is why we need to perform Shapiro-Wilk test for both groups to complement QQ-plots:
+```{r}
+data %>%
+  group_by(sim_period) %>%
+  shapiro_test(avg_navigation_time)
+```
+As the results of the test show, p-values for both groups are higher than `0.05` reference value (`p = 0.831` and `p = 0.470`, respectfully), which means that we cannot reject the null-hypothesis stating that the data within both groups are normally distributed. Hereby, we conclude that the normality assumption for both groups is satisfied.
+
+## Computation
+
+Since we established that there are no extreme outliers and the data for both groups is normally distributed, we can proceed with the execution of Welch's t-test:
+```{r}
+data %>%
+  t_test(avg_navigation_time ~ sim_period) %>%
+  add_significance()
+```
+The resulting p-value of $1.91 \cdot 10^{-9}$ is lower than `0.05` reference value for the `0.95` confidence interval. This means that the obtained p-value is statistically significant and we can reject $H_0$, which states that the means of the average navigation time for both simulation time values are equal. We can hereby conclude that the simulation time parameter has a statistically significant effect on the average navigation time.
+
+## Effect size
+
+We established with Welch's t-test results that the simulation time parameter has a statistically significant effect on the average navigation time. Now we need to perform Cohen's d test to estimate the magnitude of the said effect:
+
+```{r}
+data %>%
+  cohens_d(avg_navigation_time ~ sim_period)
+```
+The resulting effect size of `d = -6.557278` is interpreted as _large_ in R, according to the Cohen's rule of thumb^[http://www.utstat.toronto.edu/~brunner/oldclass/378f16/readings/CohenPower.pdf]. According to the new and extended rules of thumb defined by Sawilowsky, the magnitude for this d-value is considered as _huge_^[https://digitalcommons.wayne.edu/cgi/viewcontent.cgi?article=1536&context=jmasm]. This is indeed clear from the distribution of data for both treatments in the boxplot above, where we can see that the average navigation time mean for `1.5 s` simulation time is `9959.75 ms`, while it is `13556.20	ms` for `3 s` simulation time. The resulting d-value is negative since the average navigation time mean for `1.5 s` simulation time group is lower than the one for `3 s` simulation time.
+

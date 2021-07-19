@@ -1,0 +1,5 @@
+"0","data <- read.csv(file = '../../raw_data/test_resolution/run_table.csv')"
+"0","data$size_of_packets <- data$size_of_packets / 1000000"
+"0","data <- subset(data, select = c(X__run_id, resolution, size_of_packets))"
+"0","data$resolution <- factor(data$resolution, levels = c(""640x480"", ""1280x960""))"
+"0","data$size_of_packets <- as.numeric(data$size_of_packets)"

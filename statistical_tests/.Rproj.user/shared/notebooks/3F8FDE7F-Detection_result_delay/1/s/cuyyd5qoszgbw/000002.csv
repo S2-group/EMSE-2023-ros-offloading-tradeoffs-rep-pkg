@@ -1,0 +1,2 @@
+"0","data %>%"
+"0","  cohens_d(avg_detection_result_delay_ms ~ resolution)"

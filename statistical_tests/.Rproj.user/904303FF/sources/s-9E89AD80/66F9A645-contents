@@ -1,0 +1,177 @@
+---
+title: "Known map experiment - energy"
+output:
+  html_notebook: default
+---
+
+We are analyzing if offloading any of the three functionalities (i.e., localisation, navigation and object recognition) has a statistically significant effect on the total energy consumption. Fist, install and load the required libraries:
+```{r}
+if (!require('tidyverse')) install.packages('tidyverse', dependencies = TRUE); library('tidyverse')
+if (!require('ggpubr')) install.packages('ggpubr', dependencies = TRUE); library('ggpubr')
+if (!require('rstatix')) install.packages('rstatix', dependencies = TRUE); library('rstatix')
+if (!require('ggplot2')) install.packages('ggplot2', dependencies = TRUE); library('ggplot2')
+if (!require('lmPerm')) install.packages('lmPerm', dependencies = TRUE); library('lmPerm')
+if (!require('emmeans')) install.packages('emmeans', dependencies = TRUE); library('emmeans')
+```
+
+Next, load the experiment results from the csv file:
+```{r}
+data <- read.csv(file = '../../raw_data/known_map_experiment/run_table.csv')
+data <- subset(data, select = c(X__run_id, amcl_offloaded, navigation_offloaded, obj_recognition_offloaded, energy_J))
+data$amcl_offloaded <- as.factor(data$amcl_offloaded)
+data$navigation_offloaded <- as.factor(data$navigation_offloaded)
+data$obj_recognition_offloaded <- as.factor(data$obj_recognition_offloaded)
+data$energy_J <- as.numeric(data$energy_J)
+```
+
+Mean and standard deviation of the total energy consumption for each treatment are displayed in the summary below:
+```{r}
+data %>%
+  group_by(amcl_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%
+  get_summary_stats(energy_J, type = "mean_sd")
+```
+
+# Three-Way ANOVA test
+
+Since there are three independent variables in the experiment, we opt for three-way ANOVA test. First, we need to check if all assumptions for performing the test are met. The fist assumption of having independent observations is met inherently according to the way the experiment itself is conducted. 
+
+## No extreme outliers assumption
+
+Next, we need to check if there are any extreme outliers:
+
+```{r}
+data %>%
+  group_by(amcl_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%
+  identify_outliers(energy_J)
+```
+The results show that there six outliers, for runs 7, 54, 8, 44 3 and 12, respectfully,  while runs 54 and 3 represent extreme outliers. We should remove the said runs from the dataset, but we can also leave them if we believe that they will not have a significant effect on the obtained results. Let us make an alternative dataset with the extreme outliers being removed:
+```{r}
+data_without_outliers <- data
+data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_54'),]
+data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_3'),]
+```
+
+## Normality assumption by analyzing the model residuals
+
+The first way to check normality assumption is by analyzing the model residuals:
+
+```{r}
+model  <- lm(energy_J ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data)
+ggqqplot(residuals(model))
+```
+The QQ plot in the figure above shows that most of the residuals are scattered around the reference line, especially around the edges, thus we cannot assume that the residuals are normally distributed. We will complement the QQ plot with Shapiro-Wilk test to conclude if the normality is indeed satisfied:
+```{r}
+shapiro_test(residuals(model)) %>%
+  add_significance()
+```
+The p-value of $7.30 \cdot 10^{-9}$ shows that we can reject $H_0$, which states that the data is indeed normally distributed. We can conclude that the normally constraint is not satisfied. If we try with the dataset that does not contain outliers:
+```{r}
+model_without_outliers  <- lm(energy_J ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data_without_outliers)
+shapiro_test(residuals(model_without_outliers)) %>%
+  add_significance()
+```
+we get very different results that suggest that normality of residuals assumption holds, since p-value is now greater than 0.05.
+
+## Normality assumption by each group
+
+The other way to check normality is by analyzing if samples for each possible treatment combination are normally distributed:
+```{r}
+data %>%
+  group_by(amcl_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%
+  shapiro_test(energy_J) %>%
+  add_significance()
+```
+
+Shapiro-Wilk test per each group yields p-value higher than `0.05` for five out of three groups. If we execute the test on the dataset without extreme outliers:
+```{r}
+data_without_outliers %>%
+  group_by(amcl_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%
+  shapiro_test(energy_J) %>%
+  add_significance()
+```
+there is only one group that yields significant p-value thus being non-normally distributed. The QQ-plots per group are depicted below, where the data points for some groups seem to be slightly scattered around the reference line:
+```{r}
+ggqqplot(data, "energy_J", ggtheme = theme_bw()) +
+  facet_grid(amcl_offloaded + navigation_offloaded ~ obj_recognition_offloaded, labeller = "label_both")
+```
+
+## Homogeneity of variance assumption
+
+Homogeneity of variance assumption can be checked via Levene’s test:
+```{r}
+data %>% 
+  levene_test(energy_J ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded) %>%
+  add_significance()
+```
+Since the p-value is higher than `0.05`, the result of the Levene's test is not statistically significant, hence the assumption for homogeneity of variance holds. If we try the same test on data frame without outliers:
+```{r}
+data_without_outliers %>% 
+  levene_test(energy_J ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded) %>%
+  add_significance()
+```
+we come to the same conlusion that homogeneity of variances assumption holds. Since we got normality assumption satisfied for data without extreme outliers, but not in the full dataset, we will proceed with three-way ANOVA test for both datasets to compare the results.
+
+## Test execution
+
+Since all the assumptions for applying three-way ANOVA test on dataset without outliers hold, we can proceed with the computation:
+```{r}
+data_without_outliers %>% 
+  anova_test(energy_J ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded)
+```
+The results of the test do not show statistically significant three-way interaction nor any statistically significant two-way interactions between independent variables. However, there is a statistically significant main effect of object recognition on total energy consumption, respectively. If we compare this result with the one for full dataset:
+```{r}
+data %>% 
+  anova_test(energy_J ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded)
+```
+We can see that offloading navigation now also has a significant main effect on the total energy consumption. If we try non-parametric alternative to three-way ANOVA, i.e., permutation test:
+```{r}
+summary(aovp(energy_J ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data, perm="Prob", maxIter=500000, nCycle=100, Ca=0.001))
+```
+we get the same results. For these reasons, we will opt for the results that are confirmed in non-parametric test, meaning that both navigation and object recognition have significant effect on energy consumption. The eta-squared effect sizes are:
+```{r}
+res.aov <- aov(energy_J ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data)
+eta_squared(res.aov)
+```
+
+# Results
+
+Two-way ANOVA test and permutation test yielded the significant main effect when navigation is offloaded, without interactions with the other two factors. As we can see from the box plot below, offloading navigation seems to have statistically significant increase on the total energy consumption. However, the eta squared effect size for offloading navigation is $\eta^2 = 0.007$, which is considered _small_. We can also conclude from the boxplot below that the magnitude of that change is indeed minor:
+```{r}
+#pdf(file = "../../figures/known_map_experiment/energy-1.pdf")
+
+ggplot(data, aes(x = navigation_offloaded, y = energy_J, fill = navigation_offloaded)) +
+  theme_bw() + 
+  geom_boxplot(width = 0.5, outlier.size = 0.5) + 
+  stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5) +
+  labs(x = "Navigation offloaded", y = "Energy (J)") +
+  theme(legend.position = "none") +
+  theme(
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
+    
+  )
+
+#dev.off()
+```
+Test also yielded the significant main effect when object recognition is offloaded. As we can see from the box plot below, offloading object recognition seems to have statistically significant decrease on the total energy consumption, as opposed to navigation offloading. The eta squared effect size for offloading navigation is $\eta^2 = 0.867$, which is considered _large_:
+```{r}
+#pdf(file = "../../figures/known_map_experiment/energy-2.pdf")
+
+ggplot(data, aes(x = obj_recognition_offloaded, y = energy_J, fill = obj_recognition_offloaded)) +
+  theme_bw() + 
+  geom_boxplot(width = 0.5, outlier.size = 0.5) + 
+  stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5) +
+  labs(x = "Object recognition offloaded", y = "Energy (J)") +
+  theme(legend.position = "none") +
+  theme(
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
+    
+  )
+
+#dev.off()
+```

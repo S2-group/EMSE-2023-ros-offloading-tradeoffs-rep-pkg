@@ -1,0 +1,3 @@
+"0","data %>%"
+"0","  t_test(energy_J ~ particles) %>%"
+"0","  add_significance()"

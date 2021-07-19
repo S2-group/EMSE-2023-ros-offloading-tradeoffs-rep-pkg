@@ -1,0 +1,2 @@
+"0","data %>%"
+"0","  cohens_d(num_of_packets ~ frame_rate)"

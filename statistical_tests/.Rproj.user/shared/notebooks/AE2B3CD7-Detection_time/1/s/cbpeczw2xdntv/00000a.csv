@@ -1,0 +1,2 @@
+"0","ggqqplot(data, ""avg_detection_time_ms"", ggtheme = theme_bw()) +"
+"0","  facet_grid(slam_offloaded + navigation_offloaded ~ obj_recognition_offloaded, labeller = ""label_both"")"

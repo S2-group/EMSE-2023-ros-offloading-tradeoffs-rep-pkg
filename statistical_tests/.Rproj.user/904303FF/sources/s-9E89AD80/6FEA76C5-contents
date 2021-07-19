@@ -1,0 +1,85 @@
+---
+title: "Effect of the simulation time parameter on the average RAM utilisation"
+output:
+  html_notebook: default
+---
+
+We need to analyse the impact of two possible values for the simulation time on the average RAM utilisation. We have chosen two values for the simulation time, namely, `1.5 s`, which is used in the primary experiments, and two times higher value, `3 s`. First, let us load the necessary libraries:
+```{r}
+if (!require('tidyverse')) install.packages('tidyverse', dependencies = TRUE); library('tidyverse')
+if (!require('ggpubr')) install.packages('ggpubr', dependencies = TRUE); library('ggpubr')
+if (!require('rstatix')) install.packages('rstatix', dependencies = TRUE); library('rstatix')
+if (!require('ggplot2')) install.packages('ggplot2', dependencies = TRUE); library('ggplot2')
+```
+
+Next, we load the raw data output of the performed experiment:
+```{r}
+data <- read.csv(file = '../../raw_data/test_sim_period/run_table.csv')
+data$avg_memory_util <- data$avg_memory_util / 1000000
+data <- subset(data, select = c(X__run_id, sim_period, avg_memory_util))
+data$sim_period <- as.factor(data$sim_period)
+data$avg_memory_util <- as.numeric(data$avg_memory_util)
+```
+
+Mean and standard deviation of the average RAM utilisation for both simulation time values are displayed in the summary below:
+```{r}
+data %>%
+  group_by(sim_period) %>%
+  get_summary_stats(avg_memory_util, type = "mean_sd")
+```
+
+We can visualize the distribution of the data for both simulation time treatments via boxplot below:
+```{r}
+pdf(file = "../../figures/sim_time_effect/ram-utilisation.pdf")
+
+ggplot(data, aes(x = sim_period, y = avg_memory_util, fill = sim_period)) +
+  theme_bw() + 
+  geom_boxplot(width = 0.9, outlier.size = 0.5) + 
+  stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5, size = 1.5) +
+  labs(x = "Simulation time (s)", y = "Average RAM utilisation (MB)") +
+  theme(legend.position = 'none') +
+  theme(
+    axis.title.x = element_text(size = 26, family = 'sans'),
+    axis.title.y = element_text(size = 26, family = 'sans'),
+    axis.text.x = element_text(size = 24, family = 'sans'),
+    axis.text.y = element_text(size = 24, family = 'sans'),
+    
+  )
+
+dev.off()
+```
+
+# Welch's t-test
+
+We will apply the Welch's t-test to compare the means of both treatments. This is the default t-test in R and the safer alternative to standard Student's t-test, when we cannot assume that variances of both treatments are equal. However, we still need to check if other assumptions for applying this test are met. The first assumption of having independent observations, i.e. each subject belongs to only one group and there are no relationships between observations within the two groups, is satisfied inherently by the very way in which the experiment is conducted.
+
+## No significant outliers
+
+Next assumption that we need to check is if there are no significant outliers in neither of the two groups:
+```{r}
+data %>% 
+  group_by(sim_period) %>%
+  identify_outliers(avg_memory_util)
+```
+As the result above shows, there are two outliers, for runs 20 and 8, respectfully, and both are considered as extreme. Since the assumption of no significant outliers is not satisfied, we will proceed with non-parametric alternative to independent two samples t-test, which is Wilcoxon rank sum test.
+
+# Wilcoxon rank-sum test
+
+We can execute Wilcoxon rank-sum test without any assumptions checking:
+
+```{r}
+data %>%
+  rstatix::wilcox_test(avg_memory_util ~ sim_period) %>%
+  add_significance()
+```
+The resulting p-value of $1.08 \cdot 10^{-5}$ is lower than `0.05` reference value for the `0.95` confidence interval. This means that the obtained p-value is statistically significant and we can reject $H_0$, which states that the means of the average RAM utilisation for both simulation time values are equal. We can hereby conclude that the simulation time parameter has a statistically significant effect on the average RAM utilisation.
+
+## Effect size
+
+We establish with the Wilcoxon rank sum test results that the simulation time parameter has a statistically significant effect on the average RAM utilisation. Now we need estimate the magnitude of the said effect with Wilcoxon effect size test based on the Z statistics:
+```{r}
+data %>%
+  wilcox_effsize(avg_memory_util ~ sim_period)
+```
+The resulting effect size of `R = 0.8451543` is interpreted as _large_^[https://www.researchgate.net/publication/303919832_The_need_to_report_effect_size_estimates_revisited_An_overview_of_some_recommended_measures_of_effect_size]. This is indeed clear from the distribution of data for both treatments in the boxplot above, where we can see that the average RAM utilisation mean for `1.5 s` simulation time is `876382890 B`, while it is `878560264 B` for `3 s` simulation time. 
+

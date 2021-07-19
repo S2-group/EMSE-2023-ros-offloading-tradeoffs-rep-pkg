@@ -1,0 +1,4 @@
+"0","data <- read.csv(file = '../../raw_data/test_sim_period/run_table.csv')"
+"0","data <- subset(data, select = c(X__run_id, sim_period, num_of_packets))"
+"0","data$sim_period <- as.factor(data$sim_period)"
+"0","data$num_of_packets <- as.numeric(data$num_of_packets)"

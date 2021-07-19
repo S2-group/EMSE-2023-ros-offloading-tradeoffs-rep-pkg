@@ -1,0 +1,3 @@
+"0","data %>%"
+"0","  rstatix::wilcox_test(size_of_packets ~ sim_period) %>%"
+"0","  add_significance()"

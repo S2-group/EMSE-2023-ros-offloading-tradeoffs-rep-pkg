@@ -1,0 +1,3 @@
+"0","data %>% "
+"0","  levene_test(energy_J ~ slam_offloaded*navigation_offloaded*obj_recognition_offloaded) %>%"
+"0","  add_significance()"

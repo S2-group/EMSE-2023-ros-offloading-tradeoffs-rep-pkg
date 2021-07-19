@@ -1,0 +1,200 @@
+---
+title: "Unknown map experiment - RAM utilisation"
+output:
+  html_notebook: default
+---
+
+We are analyzing if offloading any of the three functionalities (i.e., SLAM, navigation and object recognition) has a statistically significant effect on the average RAM utilisation. Fist, install and load the required libraries:
+```{r}
+if (!require('tidyverse')) install.packages('tidyverse', dependencies = TRUE); library('tidyverse')
+if (!require('ggpubr')) install.packages('ggpubr', dependencies = TRUE); library('ggpubr')
+if (!require('rstatix')) install.packages('rstatix', dependencies = TRUE); library('rstatix')
+if (!require('ggplot2')) install.packages('ggplot2', dependencies = TRUE); library('ggplot2')
+if (!require('lmPerm')) install.packages('lmPerm', dependencies = TRUE); library('lmPerm')
+```
+
+Next, load the experiment results from the csv file:
+```{r}
+data <- read.csv(file = '../../raw_data/unknown_map_experiment/run_table.csv')
+data$avg_memory_util_kb <- as.numeric(data$avg_memory_util) / 100
+data <- subset(data, select = c(X__run_id, slam_offloaded, navigation_offloaded, obj_recognition_offloaded, avg_memory_util_kb))
+data$slam_offloaded <- as.factor(data$slam_offloaded)
+data$navigation_offloaded <- as.factor(data$navigation_offloaded)
+data$obj_recognition_offloaded <- as.factor(data$obj_recognition_offloaded)
+data$avg_memory_util_kb <- as.numeric(data$avg_memory_util_kb)
+```
+
+Mean and standard deviation of the average RAM utilisation for each treatment are displayed in the summary below:
+```{r}
+data %>%
+  group_by(slam_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%
+  get_summary_stats(avg_memory_util_kb, type = "mean_sd")
+```
+
+# Three-Way ANOVA test
+
+Since there are three independent variables in the experiment, we opt for three-way ANOVA test. First, we need to check if all assumptions for performing the test are met. The fist assumption of having independent observations is met inherently according to the way the experiment itself is conducted. 
+
+## No extreme outliers assumption
+
+Next, we need to check if there are any extreme outliers:
+
+```{r}
+data %>%
+  group_by(slam_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%
+  identify_outliers(avg_memory_util_kb)
+```
+
+The results show that there are five outliers, in runs 42, 37, 51, 21 and 50, respectfully, while runs 21 and 50 represents extreme outliers. We should remove the said runs from the dataset, but we can also leave them if we beleive that they will not have a significant effect on the obtained results. Let us make an alternative dataset with the extreme outlier being removed:
+
+```{r}
+data_without_outliers <- data
+data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_21'),]
+data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_50'),]
+
+```
+
+We proceed to check the next assumption - normality of the data. 
+
+## Normality assumption by analyzing the model residuals
+
+The first way to check normality assumption is by analyzing the model residuals:
+
+```{r}
+model  <- lm(avg_memory_util_kb ~ slam_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data)
+ggqqplot(residuals(model))
+```
+
+The QQ plot in the figure above shows that most of the residuals are scattered around the reference line, especially around the edges, thus we cannot assume that the residuals are normally distributed. We will complement the QQ plot with Shapiro-Wilk test to conclude if the normality is indeed satisfied:
+```{r}
+shapiro_test(residuals(model)) %>%
+  add_significance()
+```
+The p-value of `0.002` shows that we can reject $H_0$, which states that the data is indeed normally distributed. We can conclude that the normally constraint is not satisfied. If we try with the dataset that does not contain outliers:
+```{r}
+model_without_outliers  <- lm(avg_memory_util_kb ~ slam_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data_without_outliers)
+shapiro_test(residuals(model_without_outliers)) %>%
+  add_significance()
+```
+we get very similar results that lead to the conclusion that normality of residuals is indeed not satisfied.
+
+
+## Normality assumption by each group
+
+The other way to check normality is by analyzing if samples for each possible treatment combination are normally distributed:
+
+```{r}
+data %>%
+  group_by(slam_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%
+  shapiro_test(avg_memory_util_kb) %>%
+  add_significance()
+```
+
+Shapiro-Wilk test per each group yields p-value higher than `0.05` for all groups, except for the group where all three functionalites are offloaded (`p = 0.016`). If we execute the test on the dataset without extreme outliers:
+```{r}
+data_without_outliers %>%
+  group_by(slam_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%
+  shapiro_test(avg_memory_util_kb) %>%
+  add_significance()
+```
+all groups seem to be normally distributed. The QQ-plots per group are depicted below, where most of the data points seem to be aligned with the reference line:
+
+```{r}
+ggqqplot(data, "avg_memory_util_kb", ggtheme = theme_bw()) +
+  facet_grid(slam_offloaded + navigation_offloaded ~ obj_recognition_offloaded, labeller = "label_both")
+```
+
+## Homogeneity of variance assumption
+
+Homogeneity of variance assumption can be checked via Levene’s test:
+
+```{r}
+data %>% 
+  levene_test(avg_memory_util_kb ~ slam_offloaded*navigation_offloaded*obj_recognition_offloaded) %>%
+  add_significance()
+```
+Since the p-value is lower than `0.05`, the result of the Levene's test is statistically significant, hence the null hypothesis stating that homogeneity of variance holds is rejected. If we compute the Levene's test on dataset without extreme outliers:
+```{r}
+data_without_outliers %>% 
+  levene_test(avg_memory_util_kb ~ slam_offloaded*navigation_offloaded*obj_recognition_offloaded) %>%
+  add_significance()
+```
+we can draw the same conclusion - homogeneity of variance assumption is not satisfied. With the disputable normality constraint and no homogeneity of variance, we need to turn to non-parametric alternative of three-way ANOVA - permutation test.
+
+# Permutation test
+
+Execution of permutation test yields the following result:
+```{r}
+summary(aovp(avg_memory_util_kb ~ slam_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data, perm="Prob", maxIter=500000, nCycle=100, Ca=0.001))
+```
+Test results show that the main effects are significant for all three independent variables, but there is also a significant two-way interaction between SLAM and object recognition as well as between navigation and object recognition. If we compare these results with three-way ANOVA results, that is considered as _robust_ when sample sizes are equal for each group:
+```{r}
+data %>% 
+  anova_test(avg_memory_util_kb ~ slam_offloaded*navigation_offloaded*obj_recognition_offloaded)
+
+```
+we see that the conclusions are very similar to those drawn from the permutation test, but the obtained p-values are quite different. 
+
+## Pairwise comparisons for significant slam_offloaded:obj_recognition_offloaded two-way interaction 
+
+Since we have a significant two-way interaction between SLAM and object recognition, we need to perform multiple pairwise comparison to determine which group means are different. We will use estimated marginal means test for this purpose with Bonferroni adjustment. We will group the results by object recognition, since the main effect of object recognition is greater than the one of SLAM, according to three-way ANOVA results:
+```{r}
+data %>% 
+  group_by(obj_recognition_offloaded) %>%
+  emmeans_test(avg_memory_util_kb ~ slam_offloaded, p.adjust.method = "bonferroni")
+```
+We can see that offloading SLAM has a significant effect on the average RAM utilisation when object recognition is offloaded, but not when it is executed onboard.
+
+## Pairwise comparisons for significant navigation_offloaded:obj_recognition_offloaded two-way interaction 
+
+Since we have a significant two-way interaction between navigation and object recognition, we need to perform multiple pairwise comparison to determine which group means are different. We will use estimated marginal means test for this purpose with Bonferroni adjustment. We will group the result by object recognition, since the main effect of object recognition is greater than the one of navigation, according to three-way ANOVA results:
+```{r}
+data %>% 
+  group_by(obj_recognition_offloaded) %>%
+  emmeans_test(avg_memory_util_kb ~ navigation_offloaded, p.adjust.method = "bonferroni")
+```
+We can see that offloading navigation has a significant effect on the average RAM utilisation when object recognition is offloaded, but not when it is executed onboard.
+
+# Results
+
+In the box plot below, we can indeed see that when object recognition is offloaded, the average RAM utilisation is lower when SLAM is offloaded. However, when object recognition is execution onboard, offloading SLAM does not have significant effect on the average RAM utilisation. Finally, if we compare the means of two groups on the left and right, when object recognition is not offloaded and offloaded, we can see that offloading object recognition does have an enormous overall effect on the average CPU utilisation:
+```{r}
+#pdf(file = "../../figures/unknown_map_experiment/ram-utilisation-1.pdf")
+
+ggplot(data, aes(x = obj_recognition_offloaded, y = avg_memory_util_kb, fill = slam_offloaded)) +
+  theme_bw() + 
+  geom_boxplot(width = 0.5, outlier.size = 0.5) + 
+  stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5) +
+  labs(x = "Object recognition offloaded", y = "Average RAM utilisation (kB)") +
+  guides(fill=guide_legend(title="SLAM offloaded")) +
+  theme(
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
+    
+  )
+
+#dev.off()
+```
+
+Similar results are obtained for navigation. We can indeed see on the boxplot below that when object recognition is offloaded, the average RAM utilisation is lower when navigation is offloaded. However, when object recognition is execution onboard, offloading navigation does not have significant effect on the average RAM utilisation. Finally, if we compare the means of two groups on the left and right, when object recognition is not offloaded and offloaded, we can see that offloading object recognition does have an enormous overall effect on the average CPU utilisation:
+```{r}
+#pdf(file = "../../figures/unknown_map_experiment/ram-utilisation-2.pdf")
+
+ggplot(data, aes(x = obj_recognition_offloaded, y = avg_memory_util_kb, fill = navigation_offloaded)) +
+  theme_bw() + 
+  geom_boxplot(width = 0.5, outlier.size = 0.5) + 
+  stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5) +
+  labs(x = "Object recognition offloaded", y = "Average RAM utilisation (kB)") +
+  guides(fill=guide_legend(title="Navigation offloaded")) +
+  theme(
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
+    
+  )
+
+#dev.off()
+```

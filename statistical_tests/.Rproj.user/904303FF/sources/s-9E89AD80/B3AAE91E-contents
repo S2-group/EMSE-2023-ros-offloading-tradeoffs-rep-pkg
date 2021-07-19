@@ -1,0 +1,202 @@
+---
+title: "Known map experiment - object detection time"
+output:
+  html_notebook: default
+---
+
+We are analyzing if offloading any of the three functionalities (i.e., localisation, navigation and object recognition) has a statistically significant effect on the average object detection time. Fist, install and load the required libraries:
+```{r}
+if (!require('tidyverse')) install.packages('tidyverse', dependencies = TRUE); library('tidyverse')
+if (!require('ggpubr')) install.packages('ggpubr', dependencies = TRUE); library('ggpubr')
+if (!require('rstatix')) install.packages('rstatix', dependencies = TRUE); library('rstatix')
+if (!require('ggplot2')) install.packages('ggplot2', dependencies = TRUE); library('ggplot2')
+if (!require('lmPerm')) install.packages('lmPerm', dependencies = TRUE); library('lmPerm')
+if (!require('emmeans')) install.packages('emmeans', dependencies = TRUE); library('emmeans')
+```
+
+Next, load the experiment results from the csv file:
+```{r}
+data <- read.csv(file = '../../raw_data/known_map_experiment/run_table.csv')
+data <- subset(data, select = c(X__run_id, amcl_offloaded, navigation_offloaded, obj_recognition_offloaded, avg_detection_time_ms))
+data$amcl_offloaded <- as.factor(data$amcl_offloaded)
+data$navigation_offloaded <- as.factor(data$navigation_offloaded)
+data$obj_recognition_offloaded <- as.factor(data$obj_recognition_offloaded)
+data$avg_detection_time_ms <- as.numeric(data$avg_detection_time_ms)
+```
+
+Mean and standard deviation of the average object detection time for each treatment are displayed in the summary below:
+```{r}
+data %>%
+  group_by(amcl_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%
+  get_summary_stats(avg_detection_time_ms, type = "mean_sd")
+```
+
+# Three-Way ANOVA test
+
+Since there are three independent variables in the experiment, we opt for three-way ANOVA test. First, we need to check if all assumptions for performing the test are met. The fist assumption of having independent observations is met inherently according to the way the experiment itself is conducted. 
+
+## No extreme outliers assumption
+
+Next, we need to check if there are any extreme outliers:
+
+```{r}
+data %>%
+  group_by(amcl_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%
+  identify_outliers(avg_detection_time_ms)
+```
+
+The results show that there are six outliers, in runs 22, 64, 12, 31, 47 and 13, respectfully, while runs 22 and 12 represent extreme outliers. We should remove the said runs from the dataset, but we can also leave them if we believe that they will not have a significant effect on the obtained results. Let us make an alternative dataset with the extreme outliers being removed:
+
+```{r}
+data_without_outliers <- data
+data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_22'),]
+data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_12'),]
+```
+We proceed to check the next assumption - normality of the data. 
+
+## Normality assumption by analyzing the model residuals
+
+The first way to check normality assumption is by analyzing the model residuals:
+```{r}
+model  <- lm(avg_detection_time_ms ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data)
+ggqqplot(residuals(model))
+```
+
+The QQ plot in the figure above shows that most of the residuals are slightly scattered around the reference line, especially around the edges, thus we cannot assume that the residuals are normally distributed. We will complement the QQ plot with Shapiro-Wilk test to conclude if the normality is indeed satisfied:
+```{r}
+shapiro_test(residuals(model)) %>%
+  add_significance()
+```
+The p-value of $0.0005$ shows that we can reject $H_0$, which states that the data is indeed normally distributed. We can conclude that the normally constraint is not satisfied. If we try with the dataset that does not contain outliers:
+```{r}
+model_without_outliers  <- lm(avg_detection_time_ms ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data_without_outliers)
+shapiro_test(residuals(model_without_outliers)) %>%
+  add_significance()
+```
+we get similar results that lead to the conclusion that normality of residuals is indeed not satisfied.
+
+## Normality assumption by each group
+
+The other way to check normality is by analyzing if samples for each possible treatment combination are normally distributed:
+
+```{r}
+data %>%
+  group_by(amcl_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%
+  shapiro_test(avg_detection_time_ms) %>%
+  add_significance()
+```
+
+Shapiro-Wilk test per group yields p-value higher than `0.05` for five out of eight groups. If we execute the test on the dataset without extreme outliers:
+```{r}
+data_without_outliers %>%
+  group_by(amcl_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%
+  shapiro_test(avg_detection_time_ms) %>%
+  add_significance()
+```
+then two groups yield significant p-values that are lower than `0.05` thus indicating non-normal distribution. The QQ-plots per group are depicted below, where most of the data points seem to be aligned with the reference line:
+
+```{r}
+ggqqplot(data, "avg_detection_time_ms", ggtheme = theme_bw()) +
+  facet_grid(amcl_offloaded + navigation_offloaded ~ obj_recognition_offloaded, labeller = "label_both")
+```
+
+## Homogeneity of variance assumption
+
+Homogeneity of variance assumption can be checked via Levene’s test:
+
+```{r}
+data %>% 
+  levene_test(avg_detection_time_ms ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded) %>%
+  add_significance()
+```
+Since the p-value is lower than `0.05`, the result of the Levene's test is statistically significant, hence the null hypothesis stating that homogeneity of variance holds is rejected. If we compute the Levene's test on dataset without extreme outliers:
+```{r}
+data_without_outliers %>% 
+  levene_test(avg_detection_time_ms ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded) %>%
+  add_significance()
+```
+we can draw the same conclusion - homogeneity of variance assumption is not satisfied hence we cannot apply three-way ANOVA. With the disputable normality constraint and no homogeneity of variance, we need to turn to non-parametric alternative of three-way ANOVA - permutation test.
+
+
+# Permutation test
+
+Execution of permutation test yields the following result:
+```{r}
+summary(aovp(avg_detection_time_ms ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data, perm="Prob", maxIter=500000, nCycle=100, Ca=0.001))
+```
+Test results show that the main effects are significant for all three independent variables, but there is also a significant three-way interaction. If we compare these results with three-way ANOVA results, that is considered as _robust_ when sample sizes are equal for each group:
+```{r}
+data %>%
+  anova_test(avg_detection_time_ms ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded)
+
+```
+we see that the obtained p-values and conclusions are very similar to those drawn from the permutation test. The eta-squared effect sizes are:
+```{r}
+res.aov <- aov(avg_detection_time_ms ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data)
+eta_squared(res.aov)
+```
+
+## Compute simple two-way interactions
+
+We need to inspect the significant three-way interaction by breaking it into simple two-way interactions and performing two-way ANOVA. We will group the results by object recognition, since it has the most significant main effect:
+```{r}
+model <- lm(avg_detection_time_ms ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data)
+data %>%
+  group_by(obj_recognition_offloaded) %>%
+  anova_test(avg_detection_time_ms ~  amcl_offloaded*navigation_offloaded, error = model)
+```
+
+We can see that there is a significant two-way interaction between localisation and navigation when object recognition is offloaded, but not when it is executed on-board. We need to break this significant two-way interaction and compute simple simple main effects.
+
+## Compute simple simple main effects
+
+We will inspect the effect of localisation offloading for every navigation offloaded group, when object recognition is offloaded, since this yielded significant two-way interaction in the simple two-way interaction computation.
+```{r}
+data %>%
+  group_by(obj_recognition_offloaded, navigation_offloaded) %>%
+  anova_test(avg_detection_time_ms ~ amcl_offloaded, error = model)
+```
+
+We can see that offloading localisation has a significant effect on average object detection time when both navigation is either offloaded and not, but object recognition isn't.
+
+## Compute simple simple comparisons
+
+From emmans test below, we can indeed confirm this, but when navigation is offloaded, offloading localisation seems to increase the average object detection time.
+```{r}
+data %>%
+  group_by(obj_recognition_offloaded, navigation_offloaded) %>%
+  emmeans_test(avg_detection_time_ms ~ amcl_offloaded, p.adjust.method = "bonferroni", detailed = TRUE) %>%
+  filter(obj_recognition_offloaded == "true")
+```
+
+
+# Results
+
+In the box plot below, we can see the large differences in the average object detection time when object recognition is offloaded and not. However, when we offload navigation as well, it seems that object detection time is better when localisation remains on-board:  
+```{r}
+facet_values <- list('false'='Object recognition on-board',
+                     'true'='Object recognition offloaded')
+
+facet_labeller <- function(variable,value){
+  return(facet_values[value])
+}
+
+#pdf(file = "../../figures/known_map_experiment/detection-time-1.pdf")
+
+ggplot(data, aes(x = navigation_offloaded, y = avg_detection_time_ms, fill = amcl_offloaded)) +
+  theme_bw() + 
+  geom_boxplot(width = 0.5, outlier.size = 0.5) + 
+  stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5) +
+  labs(x = "Navigation offloaded", y = "Average object detection time (ms)") +
+  guides(fill=guide_legend(title="Localisation offloaded")) +
+  facet_wrap(facets = ~obj_recognition_offloaded, labeller = facet_labeller) +
+  theme(
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
+    
+  )
+
+#dev.off()
+```

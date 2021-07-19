@@ -1,0 +1,85 @@
+---
+title: "Effect of the number of SLAM filter particles parameter on the total size of network packets"
+output:
+  html_notebook: default
+---
+
+We need to analyse the impact of two possible values for the number of SLAM filter particles on the total size of network packets. We have chosen two values for the number of particles, namely, `5`, which is used in the primary experiments, and `30`, which is the default value in Gmapping ROS package. First, let us load the necessary libraries:
+```{r}
+if (!require('tidyverse')) install.packages('tidyverse', dependencies = TRUE); library('tidyverse')
+if (!require('ggpubr')) install.packages('ggpubr', dependencies = TRUE); library('ggpubr')
+if (!require('rstatix')) install.packages('rstatix', dependencies = TRUE); library('rstatix')
+if (!require('ggplot2')) install.packages('ggplot2', dependencies = TRUE); library('ggplot2')
+```
+
+Next, we load the raw data output of the performed experiment:
+```{r}
+data <- read.csv(file = '../../raw_data/test_particles/run_table.csv')
+data <- subset(data, select = c(X__run_id, particles, size_of_packets))
+data$particles <- as.factor(data$particles)
+data$size_of_packets <- as.numeric(data$size_of_packets)
+```
+
+Mean and standard deviation of the total size of network packets for both particle number values are displayed in the summary below:
+```{r}
+data %>%
+  group_by(particles) %>%
+  get_summary_stats(size_of_packets, type = "mean_sd")
+```
+
+We can visualize the distribution of the data for both particle number treatments via boxplot below:
+```{r}
+ggplot(data, aes(x = particles, y = size_of_packets, fill = particles)) +
+  theme_bw() + 
+  geom_boxplot(width = 0.5, outlier.size = 0.5) + 
+  geom_jitter(width = 0.2) +
+  stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5, size = 1.5) +
+  labs(x = "Number of SLAM filter particles (#)", y = "Total size of packets (B)") +
+  theme(legend.position = 'none') +
+  theme(
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
+    
+  )
+```
+
+# Welch's t-test
+
+We will apply the Welch's t-test to compare the means of both treatments. This is the default t-test in R and the safer alternative to standard Student's t-test, when we cannot assume that variances of both treatments are equal. However, we still need to check if other assumptions for applying this test are met. The first assumption of having independent observations, i.e. each subject belongs to only one group and there are no relationships between observations within the two groups, is satisfied inherently by the very way in which the experiment is conducted.
+
+## No significant outliers
+
+Next assumption that we need to check is if there are no significant outliers in neither of the two groups:
+```{r}
+data %>% 
+  group_by(particles) %>%
+  identify_outliers(size_of_packets)
+```
+
+As the result above shows, there are indeed no significant outliers thus we can proceed with other assumptions.
+
+## Normality
+
+Next, we need to check if data in both groups stem from a normal distribution. To do so, we first need to draw QQ-plot for both groups:
+```{r}
+ggqqplot(data, x = "size_of_packets", facet.by = "particles")
+```
+Data points on left figure, for `5` particles group, seem to be almost aligned alongside the respective reference lines which means that the data is indeed normally distributed. However, we cannot claim so with a great certainty for the `30` particles group on the right figure, where data seems to be scattered to an extent. We need to perform Shapiro-Wilk test for each group to check the assumptions drawn from the QQ-plots:
+```{r}
+data %>%
+  group_by(particles) %>%
+  shapiro_test(size_of_packets)
+```
+As the results of the test show, p-values for both groups are higher than `0.05` reference value (`p = 0.340` and `p = 0.468`, respectfully), which means that we cannot reject the null-hypothesis stating that the data within both groups are normally distributed. Hereby, we conclude that the normality assumption for both groups is satisfied.
+
+## Computation
+
+Since we established that there are no extreme outliers and the data for both groups is normally distributed, we can proceed with the execution of Welch's t-test:
+```{r}
+data %>%
+  t_test(size_of_packets ~ particles) %>%
+  add_significance()
+```
+The resulting p-value of $0.94$ is much higher than `0.05` reference value for the `0.95` confidence interval. This means that the obtained p-value is not statistically significant and we cannot reject $H_0$, which states that the means of the total size of network packets for both particle number values are equal. We can hereby conclude that the number of filter particles parameter does not have a statistically significant effect on the total size of network packets.

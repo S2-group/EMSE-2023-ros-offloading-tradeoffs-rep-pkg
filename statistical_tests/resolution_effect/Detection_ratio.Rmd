@@ -1,0 +1,101 @@
+---
+title: "Effect of camera resolution parameter on the detection ratio"
+output:
+  html_notebook: default
+---
+
+We need to analyse the impact of two possible values of camera resolution on the detection ration. We have chosen two values for resolution, namely, `640x480px`, which is used in the primary experiments, and two times higher resolution, `1280x960px`. First, let us load the necessary libraries:
+```{r}
+if (!require('tidyverse')) install.packages('tidyverse', dependencies = TRUE); library('tidyverse')
+if (!require('ggpubr')) install.packages('ggpubr', dependencies = TRUE); library('ggpubr')
+if (!require('rstatix')) install.packages('rstatix', dependencies = TRUE); library('rstatix')
+if (!require('ggplot2')) install.packages('ggplot2', dependencies = TRUE); library('ggplot2')
+```
+
+Next, we load the raw data output of the performed experiment:
+```{r}
+data <- read.csv(file = '../../raw_data/test_resolution/run_table.csv')
+data <- subset(data, select = c(X__run_id, resolution, recognition_ratio))
+data$resolution <- factor(data$resolution, levels = c("640x480", "1280x960"))
+data$recognition_ratio <- as.numeric(data$recognition_ratio)
+```
+
+Mean and standard deviation of the recognition ratio for both resolutions are displayed in the summary below:
+```{r}
+data %>%
+  group_by(resolution) %>%
+  get_summary_stats(recognition_ratio, type = "mean_sd")
+```
+
+We can visualize the distribution of the data for both resolution treatments via boxplot below:
+```{r}
+pdf(file = "../../figures/resolution_effect/detection_ratio.pdf")
+
+ggplot(data, aes(x = resolution, y = recognition_ratio, fill = resolution)) +
+  theme_bw() + 
+  geom_boxplot(width = 0.9, outlier.size = 0.5) + 
+  stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5, size = 1.5) +
+  labs(x = "Resolution (px)", y = "Recognition ration (%)") +
+  theme(legend.position = 'none') +
+  theme(
+    axis.title.x = element_text(size = 30, family = 'sans'),
+    axis.title.y = element_text(size = 30, family = 'sans'),
+    axis.text.x = element_text(size = 30, family = 'sans'),
+    axis.text.y = element_text(size = 30, family = 'sans')
+  )
+
+dev.off()
+```
+
+# Welch's t-test
+
+We will apply the Welch's t-test to compare the means of both treatments. This is the default t-test in R and the safer alternative to standard Student's t-test, when we cannot assume that variances of both treatments are equal. However, we still need to check if other assumptions for applying this test are met. The first assumption of having independent observations, i.e. each subject belongs to only one group and there are no relationships between observations within the two groups, is satisfied inherently by the very way in which the experiment is conducted.
+
+## No significant outliers
+
+Next assumption that we need to check is if there are no significant outliers in neither of the two groups:
+```{r}
+data %>% 
+  group_by(resolution) %>%
+  identify_outliers(recognition_ratio)
+```
+
+As the result above shows, there are two outliers, for runs 7 and 1, respectfully, but neither is considered extreme in terms of statistical significance. We can proceed with other assumptions.
+
+## Normality
+
+Next, we need to check if data in both groups stem from a normal distribution. To do so, we first need to draw QQ-plot for both groups:
+```{r}
+ggqqplot(data, x = "recognition_ratio", facet.by = "resolution")
+```
+Data points on the right figure, in `640x480px` resolution group, do seem to be more or less aligned with the reference line. However, we cannot confirm this with great certainty for the `1280x960px` resolution group, since the data points on the left figure above seem to be scattered to an extent. This is why we need to perform Shapiro-Wilk test for both groups to complement QQ-plot conclusions:
+```{r}
+data %>%
+  group_by(resolution) %>%
+  shapiro_test(recognition_ratio)
+```
+As the results of the test show, p-values for both groups are higher than `0.05` reference value (`p = 0.073` and `p = 0.672`, respectfully), which means that we cannot reject the null-hypothesis stating that the data within both groups are normally distributed. Hereby, we conclude that the normality assumption for both groups is satisfied.
+
+## Computation
+
+Since we established that there are no extreme outliers and the data for both groups is normally distributed, we can proceed with the execution of Welch's t-test:
+```{r}
+data %>%
+  t_test(recognition_ratio ~ resolution) %>%
+  add_significance()
+```
+The resulting p-value of $0.00346$ is lower than `0.05` reference value for the `0.95` confidence interval. This means that the obtained p-value is statistically significant and we can reject $H_0$, which states that the means of recognition ratio for both resolution values are equal. We can hereby conclude that camera resolution parameter has a statistically significant effect on the recognition ratio.
+
+## Effect size
+
+We established with Welch's t-test result that camera resolution parameter has a statistically significant effect on the recognition ratio. Now we need to perform Cohen's d test to estimate the magnitude of the said effect:
+
+```{r}
+data %>%
+  cohens_d(recognition_ratio ~ resolution)
+```
+The resulting effect size of `d = 1.552775` is interpreted as _large_ in R, according to the Cohen's rule of thumb^[http://www.utstat.toronto.edu/~brunner/oldclass/378f16/readings/CohenPower.pdf]. According to the new and extended rules of thumb defined by Sawilowsky, the magnitude for this d-value is considered as _very large_^[https://digitalcommons.wayne.edu/cgi/viewcontent.cgi?article=1536&context=jmasm]. This is indeed clear from the distribution of data for both treatments in the boxplot above, where we can see that the average detection result delay mean for `640x480px` resolution is `36.758%`, while it is `41.507%` for `1280x960px`. 
+
+
+
+

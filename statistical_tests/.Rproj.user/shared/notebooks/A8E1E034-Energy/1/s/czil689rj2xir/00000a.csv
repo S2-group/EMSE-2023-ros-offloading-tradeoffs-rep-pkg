@@ -1,0 +1,2 @@
+"0","model  <- lm(energy_J ~ slam_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data)"
+"0","ggqqplot(residuals(model))"

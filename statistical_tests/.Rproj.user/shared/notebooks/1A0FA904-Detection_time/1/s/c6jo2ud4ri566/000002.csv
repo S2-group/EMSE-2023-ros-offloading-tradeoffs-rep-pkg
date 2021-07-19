@@ -1,0 +1,4 @@
+"0","data <- read.csv(file = '../../raw_data/test_temporal_updates/run_table.csv')"
+"0","data <- subset(data, select = c(X__run_id, temporal_updates, avg_detection_time_ms))"
+"0","data$temporal_updates <- as.factor(data$temporal_updates)"
+"0","data$avg_detection_time_ms <- as.numeric(data$avg_detection_time_ms)"

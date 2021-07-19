@@ -1,0 +1,4 @@
+"0","data %>%"
+"0","  group_by(amcl_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%"
+"0","  shapiro_test(avg_navigation_time_s) %>%"
+"0","  add_significance()"

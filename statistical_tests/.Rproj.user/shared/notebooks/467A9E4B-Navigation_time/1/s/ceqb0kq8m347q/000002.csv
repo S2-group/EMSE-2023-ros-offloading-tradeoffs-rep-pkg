@@ -1,0 +1,5 @@
+"0","data <- read.csv(file = '../../raw_data/test_frame_rate/run_table.csv')"
+"0","data$avg_navigation_time_ms <- data$avg_goal_sending_delay_ms + data$avg_goal_processing_s*1000 + data$avg_nav_result_delay_ms"
+"0","data <- subset(data, select = c(X__run_id, frame_rate, avg_navigation_time_ms))"
+"0","data$frame_rate <- as.factor(data$frame_rate)"
+"0","data$avg_navigation_time_ms <- as.numeric(data$avg_navigation_time_ms)"

@@ -1,0 +1,159 @@
+---
+title: "Known map experiment - average navigation time"
+output:
+  html_notebook: default
+---
+
+We are analyzing if offloading any of the three functionalities (i.e., localisation, navigation and object recognition) has a statistically significant effect on the average navigation time. Fist, install and load the required libraries:
+```{r}
+if (!require('tidyverse')) install.packages('tidyverse', dependencies = TRUE); library('tidyverse')
+if (!require('ggpubr')) install.packages('ggpubr', dependencies = TRUE); library('ggpubr')
+if (!require('rstatix')) install.packages('rstatix', dependencies = TRUE); library('rstatix')
+if (!require('ggplot2')) install.packages('ggplot2', dependencies = TRUE); library('ggplot2')
+if (!require('lmPerm')) install.packages('lmPerm', dependencies = TRUE); library('lmPerm')
+if (!require('emmeans')) install.packages('emmeans', dependencies = TRUE); library('emmeans')
+```
+
+Next, load the experiment results from the csv file:
+```{r}
+data <- read.csv(file = '../../raw_data/known_map_experiment/run_table.csv')
+data$avg_navigation_time_s <- (data$avg_goal_sending_delay_ms + data$avg_goal_processing_s*1000 + data$avg_nav_result_delay_ms)/1000
+data <- subset(data, select = c(X__run_id, amcl_offloaded, navigation_offloaded, obj_recognition_offloaded, avg_navigation_time_s))
+data$amcl_offloaded <- as.factor(data$amcl_offloaded)
+data$navigation_offloaded <- as.factor(data$navigation_offloaded)
+data$obj_recognition_offloaded <- as.factor(data$obj_recognition_offloaded)
+data$avg_navigation_time_s <- as.numeric(data$avg_navigation_time_s)
+```
+
+Mean and standard deviation of the average navigation time for each treatment are displayed in the summary below:
+```{r}
+data %>%
+  group_by(amcl_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%
+  get_summary_stats(avg_navigation_time_s, type = "mean_sd")
+```
+
+# Three-Way ANOVA test
+
+Since there are three independent variables in the experiment, we opt for three-way ANOVA test. First, we need to check if all assumptions for performing the test are met. The fist assumption of having independent observations is met inherently according to the way the experiment itself is conducted. 
+
+## No extreme outliers assumption
+
+Next, we need to check if there are any extreme outliers:
+
+```{r}
+data %>%
+  group_by(amcl_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%
+  identify_outliers(avg_navigation_time_s)
+```
+The results show that there six outliers, for runs 54, 48, 55, 44, 3 and 12, respectfully,  while runs 54, 3 and 12 represent extreme outliers. We should remove the said runs from the dataset, but we can also leave them if we believe that they will not have a significant effect on the obtained results. Let us make an alternative dataset with the extreme outliers being removed:
+```{r}
+data_without_outliers <- data
+data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_54'),]
+data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_3'),]
+data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_12'),]
+```
+## Normality assumption by analyzing the model residuals
+
+The first way to check normality assumption is by analyzing the model residuals:
+
+```{r}
+model  <- lm(avg_navigation_time_s ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data)
+ggqqplot(residuals(model))
+```
+The QQ plot in the figure above shows that most of the residuals are scattered around the reference line, especially around the edges, thus we cannot assume that the residuals are normally distributed. We will complement the QQ plot with Shapiro-Wilk test to conclude if the normality is indeed satisfied:
+```{r}
+shapiro_test(residuals(model)) %>%
+  add_significance()
+```
+The p-value of $5.49 \cdot 10^{-8}$ shows that we can reject $H_0$, which states that the data is indeed normally distributed. We can conclude that the normally constraint is not satisfied. If we try with the dataset that does not contain outliers:
+```{r}
+model_without_outliers  <- lm(avg_navigation_time_s ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data_without_outliers)
+shapiro_test(residuals(model_without_outliers)) %>%
+  add_significance()
+```
+we get very different results that suggest that normality of residuals assumption holds, since p-value is now greater than 0.05.
+
+## Normality assumption by each group
+
+The other way to check normality is by analyzing if samples for each possible treatment combination are normally distributed:
+```{r}
+data %>%
+  group_by(amcl_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%
+  shapiro_test(avg_navigation_time_s) %>%
+  add_significance()
+```
+
+Shapiro-Wilk test per each group yields p-value higher than `0.05` for all groups but two. If we execute the test on the dataset without extreme outliers:
+```{r}
+data_without_outliers %>%
+  group_by(amcl_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%
+  shapiro_test(avg_navigation_time_s) %>%
+  add_significance()
+```
+all groups seem to be normally distributed. The QQ-plots per group are depicted below, where the data points for some groups seem to be slightly scattered around the reference line:
+```{r}
+ggqqplot(data, "avg_navigation_time_s", ggtheme = theme_bw()) +
+  facet_grid(amcl_offloaded + navigation_offloaded ~ obj_recognition_offloaded, labeller = "label_both")
+```
+
+## Homogeneity of variance assumption
+
+Homogeneity of variance assumption can be checked via Levene’s test:
+
+```{r}
+data %>% 
+  levene_test(avg_navigation_time_s ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded) %>%
+  add_significance()
+```
+Since the p-value is higher than `0.05`, the result of the Levene's test is not statistically significant, hence the assumption for homogeneity of variance holds. If we try the same test on data frame without outliers:
+```{r}
+data_without_outliers %>% 
+  levene_test(avg_navigation_time_s ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded) %>%
+  add_significance()
+```
+we come to the same conlusion that homogeneity of variances assumption holds. Since we got normality assumption satisfied for data without extreme outliers, but not in the full dataset, we will proceed with three-way ANOVA test for both datasets to compare the results.
+
+## Test execution
+
+Since all the assumptions for applying three-way ANOVA test on dataset without outliers hold, we can proceed with the computation:
+```{r}
+data_without_outliers %>% 
+  anova_test(avg_navigation_time_s ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded)
+```
+The results of the test do not show statistically significant three-way interaction nor any statistically significant two-way interactions between independent variables. However, there is a statistically significant main effect of object recognition on average navigation time, respectively. If we compare this result with the one for full dataset:
+```{r}
+data %>% 
+  anova_test(avg_navigation_time_s ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded)
+```
+we get the same result. If we try non-parametric alternative to three-way ANOVA, i.e., permutation test:
+```{r}
+summary(aovp(avg_navigation_time_s ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data, perm="Prob", maxIter=500000, nCycle=100, Ca=0.001))
+```
+we get the same result again. We can conclude that only object recognition has a significant effect on the average mission execution time. The eta-squared effect sizes are:
+```{r}
+res.aov <- aov(avg_navigation_time_s ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data)
+eta_squared(res.aov)
+```
+
+# Results
+
+Two-way ANOVA test and permutation test yielded the significant main effect when object recognition is offloaded, without interactions with the other two factors. As we can see from the box plot below, offloading object recognition seems to have statistically significant decrease on the average navigation time. The eta squared effect size for offloading navigation is $\eta^2 = 0.274$, which is considered _large_, as we can also conclude from the boxplot below:
+```{r}
+pdf(file = "../../figures/known_map_experiment/navigation-time-1.pdf")
+
+ggplot(data, aes(x = obj_recognition_offloaded, y = avg_navigation_time_s, fill = obj_recognition_offloaded)) +
+  theme_bw() + 
+  geom_boxplot(width = 0.5, outlier.size = 0.5) + 
+  stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5) +
+  labs(x = "Object recognition offloaded", y = "Average navigation time (s)") +
+  theme(legend.position = "none") +
+  theme(
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
+    
+  )
+
+dev.off()
+```

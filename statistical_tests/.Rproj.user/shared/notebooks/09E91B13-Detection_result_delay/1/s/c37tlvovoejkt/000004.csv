@@ -1,0 +1,3 @@
+"0","data %>%"
+"0","  t_test(avg_detection_result_delay_ms ~ velocity_samples) %>%"
+"0","  add_significance()"

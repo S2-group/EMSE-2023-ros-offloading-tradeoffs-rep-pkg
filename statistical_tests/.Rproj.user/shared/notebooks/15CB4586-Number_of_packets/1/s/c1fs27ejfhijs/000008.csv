@@ -1,0 +1,3 @@
+"0","data %>%"
+"0","  group_by(slam_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%"
+"0","  get_summary_stats(num_of_packets, type = ""mean_sd"")"

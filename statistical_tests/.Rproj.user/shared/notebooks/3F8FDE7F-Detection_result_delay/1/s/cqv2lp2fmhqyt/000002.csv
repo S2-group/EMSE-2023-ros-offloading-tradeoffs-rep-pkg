@@ -1,0 +1,3 @@
+"0","data %>%"
+"0","  group_by(resolution) %>%"
+"0","  shapiro_test(avg_detection_result_delay_ms)"

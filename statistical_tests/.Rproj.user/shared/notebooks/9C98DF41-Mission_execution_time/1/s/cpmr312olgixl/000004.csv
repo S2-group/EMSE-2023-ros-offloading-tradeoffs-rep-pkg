@@ -1,0 +1,3 @@
+"0","data %>%"
+"0","  group_by(particles) %>%"
+"0","  get_summary_stats(mission_execution_s, type = ""mean_sd"")"

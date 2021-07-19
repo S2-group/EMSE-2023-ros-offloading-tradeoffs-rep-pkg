@@ -1,0 +1,2 @@
+"0","data %>%"
+"0","  wilcox_effsize(avg_cpu_util ~ frame_rate)"

@@ -1,0 +1,3 @@
+"0","data %>%"
+"0","  t_test(energy_J ~ velocity_samples) %>%"
+"0","  add_significance()"

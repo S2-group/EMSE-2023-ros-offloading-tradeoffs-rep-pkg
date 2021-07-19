@@ -1,0 +1,150 @@
+---
+title: "Unknown map experiment - feature extraction time"
+output:
+  html_notebook: default
+---
+
+We are analyzing if offloading any of the three functionalities (i.e., SLAM, navigation and object recognition) has a statistically significant effect on the average feature extraction time. Fist, install and load the required libraries:
+```{r}
+if (!require('tidyverse')) install.packages('tidyverse', dependencies = TRUE); library('tidyverse')
+if (!require('ggpubr')) install.packages('ggpubr', dependencies = TRUE); library('ggpubr')
+if (!require('rstatix')) install.packages('rstatix', dependencies = TRUE); library('rstatix')
+if (!require('ggplot2')) install.packages('ggplot2', dependencies = TRUE); library('ggplot2')
+if (!require('lmPerm')) install.packages('lmPerm', dependencies = TRUE); library('lmPerm')
+if (!require('emmeans')) install.packages('emmeans', dependencies = TRUE); library('emmeans')
+```
+
+Next, load the experiment results from the csv file:
+```{r}
+data <- read.csv(file = '../../raw_data/unknown_map_experiment/run_table.csv')
+data <- subset(data, select = c(X__run_id, slam_offloaded, navigation_offloaded, obj_recognition_offloaded, avg_extraction_time_ms))
+data$slam_offloaded <- as.factor(data$slam_offloaded)
+data$navigation_offloaded <- as.factor(data$navigation_offloaded)
+data$obj_recognition_offloaded <- as.factor(data$obj_recognition_offloaded)
+data$avg_extraction_time_ms <- as.numeric(data$avg_extraction_time_ms)
+```
+
+Mean and standard deviation of the average feature extraction time for each treatment are displayed in the summary below:
+```{r}
+data %>%
+  group_by(slam_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%
+  get_summary_stats(avg_extraction_time_ms, type = "mean_sd")
+```
+
+# Three-Way ANOVA test
+
+Since there are three independent variables in the experiment, we opt for three-way ANOVA test. First, we need to check if all assumptions for performing the test are met. The fist assumption of having independent observations is met inherently according to the way the experiment itself is conducted. 
+
+## No extreme outliers assumption
+
+Next, we need to check if there are any extreme outliers:
+
+```{r}
+data %>%
+  group_by(slam_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%
+  identify_outliers(avg_extraction_time_ms)
+```
+
+The results show that there are seven outliers, in runs 79, 68, 70, 55, 72, 37 and 56, respectfully, while runs 68, 70, 55, 72 and 37 represents extreme outliers. We should remove the said runs from the dataset, but we can also leave them if we believe that they will not have a significant effect on the obtained results. Let us make an alternative dataset with the extreme outliers being removed:
+
+```{r}
+data_without_outliers <- data
+data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_68'),]
+data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_70'),]
+data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_55'),]
+data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_72'),]
+data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_37'),]
+```
+We proceed to check the next assumption - normality of the data. 
+
+## Normality assumption by analyzing the model residuals
+
+The first way to check normality assumption is by analyzing the model residuals:
+
+```{r}
+model  <- lm(avg_extraction_time_ms ~ slam_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data)
+ggqqplot(residuals(model))
+```
+
+The QQ plot in the figure above shows that most of the residuals are scattered around the reference line, especially around the edges, thus we cannot assume that the residuals are normally distributed. We will complement the QQ plot with Shapiro-Wilk test to conclude if the normality is indeed satisfied:
+```{r}
+shapiro_test(residuals(model)) %>%
+  add_significance()
+```
+The p-value of `0.0001` shows that we can reject $H_0$, which states that the data is indeed normally distributed. We can conclude that the normally constraint is not satisfied. If we try with the dataset that does not contain outliers:
+```{r}
+model_without_outliers  <- lm(avg_extraction_time_ms ~ slam_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data_without_outliers)
+shapiro_test(residuals(model_without_outliers)) %>%
+  add_significance()
+```
+we get very similar results that lead to the conclusion that normality of residuals is indeed not satisfied.
+
+## Normality assumption by each group
+
+The other way to check normality is by analyzing if samples for each possible treatment combination are normally distributed:
+
+```{r}
+data %>%
+  group_by(slam_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%
+  shapiro_test(avg_extraction_time_ms) %>%
+  add_significance()
+```
+
+Shapiro-Wilk test per each group yields p-value higher than `0.05` for only half of the groups. If we execute the test on the dataset without extreme outliers:
+```{r}
+data_without_outliers %>%
+  group_by(slam_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%
+  shapiro_test(avg_extraction_time_ms) %>%
+  add_significance()
+```
+only the two groups yield significant p-values that are lower than `0.05` thus indicating non-normal distribution. The QQ-plots per group are depicted below, where the data seems to be aligned with the respective reference lines for most of the groups:
+
+```{r}
+ggqqplot(data, "avg_extraction_time_ms", ggtheme = theme_bw()) +
+  facet_grid(slam_offloaded + navigation_offloaded ~ obj_recognition_offloaded, labeller = "label_both")
+```
+
+## Homogeneity of variance assumption
+
+Homogeneity of variance assumption can be checked via Levene’s test:
+
+```{r}
+data %>% 
+  levene_test(avg_extraction_time_ms ~ slam_offloaded*navigation_offloaded*obj_recognition_offloaded) %>%
+  add_significance()
+```
+Since the p-value is higher than `0.05`, the result of the Levene's test is not statistically significant, hence the assumption for homogeneity of variance holds. This assumption is more important for performing ANOVA then normality, yet since normality of the data is not satisfied and there are outliers, we will perform non-parametric alternative to three-way ANOVA, permutation test, and complement its results with three-way ANOVA.
+
+# Permutation test
+
+Execution of permutation test yields the following result:
+```{r}
+summary(aovp(avg_extraction_time_ms ~ slam_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data, perm="Prob", maxIter=500000, nCycle=100, Ca=0.001))
+```
+Test results show that the main effect is significant only when object recognition is offloaded and there are no significant three-way or two-way interactions. If we compare these results with three-way ANOVA results, that is considered as _robust_ when sample sizes are equal for each group, which is indeed the case in this experiment:
+```{r}
+data %>%
+  anova_test(avg_extraction_time_ms ~ slam_offloaded*navigation_offloaded*obj_recognition_offloaded)
+
+```
+we see that the obtained p-values and conclusions are very similar to those drawn from the permutation test. 
+
+# Results
+
+Both two-way anova and permutation test yielded the significant main effect when object recognition is offloaded, without interactions with the other two factors:
+```{r}
+ggplot(data, aes(x = obj_recognition_offloaded, y = avg_extraction_time_ms, fill = obj_recognition_offloaded)) +
+  theme_bw() + 
+  geom_boxplot(width = 0.5, outlier.size = 0.5) + 
+  stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5) +
+  labs(x = "Object recognition offloaded", y = "Average feature extraction time (ms)") +
+  theme(legend.position = "none") +
+  theme(
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
+    
+  )
+```
+We can indeed see from the boxplot above that the feature extraction time is much lower when object recognition is offloaded.

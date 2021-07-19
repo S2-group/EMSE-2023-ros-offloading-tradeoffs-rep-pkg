@@ -1,0 +1,85 @@
+---
+title: "Effect of camera resolution parameter on the total mission execution time"
+output:
+  html_notebook: default
+---
+
+We need to analyse the impact of two possible values of camera resolution on the total mission execution time. We have chosen two values for resolution, namely, `640x480px`, which is used in the primary experiments, and two times higher resolution, `1280x960px`. First, let us load the necessary libraries:
+```{r}
+if (!require('tidyverse')) install.packages('tidyverse', dependencies = TRUE); library('tidyverse')
+if (!require('ggpubr')) install.packages('ggpubr', dependencies = TRUE); library('ggpubr')
+if (!require('rstatix')) install.packages('rstatix', dependencies = TRUE); library('rstatix')
+if (!require('ggplot2')) install.packages('ggplot2', dependencies = TRUE); library('ggplot2')
+```
+
+Next, we load the raw data output of the performed experiment:
+```{r}
+data <- read.csv(file = '../../raw_data/test_resolution/run_table.csv')
+data <- subset(data, select = c(X__run_id, resolution, mission_execution_s))
+data$resolution <- factor(data$resolution, levels = c("640x480", "1280x960"))
+data$mission_execution_s <- as.numeric(data$mission_execution_s)
+```
+
+Mean and standard deviation of the total mission execution time for both resolutions are displayed in the summary below:
+```{r}
+data %>%
+  group_by(resolution) %>%
+  get_summary_stats(mission_execution_s, type = "mean_sd")
+```
+
+We can visualize the distribution of the data for both resolution treatments via boxplot below:
+```{r}
+ggplot(data, aes(x = resolution, y = mission_execution_s, fill = resolution)) +
+  theme_bw() + 
+  geom_boxplot(width = 0.5, outlier.size = 0.5) + 
+  stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5, size = 1.5) +
+  labs(x = "Resolution (px)", y = "Total mission execution (s)") +
+  theme(legend.position = 'none') +
+  theme(
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
+    
+  )
+```
+
+# Welch's t-test
+
+We will apply the Welch's t-test to compare the means of both treatments. This is the default t-test in R and the safer alternative to standard Student's t-test, when we cannot assume that variances of both treatments are equal. However, we still need to check if other assumptions for applying this test are met. The first assumption of having independent observations, i.e. each subject belongs to only one group and there are no relationships between observations within the two groups, is satisfied inherently by the very way in which the experiment is conducted.
+
+## No significant outliers
+
+Next assumption that we need to check is if there are no significant outliers in neither of the two groups:
+```{r}
+data %>% 
+  group_by(resolution) %>%
+  identify_outliers(mission_execution_s)
+```
+
+As the result above shows, there are indeed no significant outliers thus we can proceed with other assumptions.
+
+## Normality
+
+Next, we need to check if data in both groups stem from a normal distribution. To do so, we first need to draw QQ-plot for both groups:
+```{r}
+ggqqplot(data, x = "mission_execution_s", facet.by = "resolution")
+```
+Data points on the left figure, in `1280x960px` resolution group, do seem to be aligned with the reference line. However, we cannot confirm this with great certainty for the `640x480px` resolution group, since the data points on the right figure above seem to be scattered to an extent. This is why we need to perform Shapiro-Wilk test for both groups to complement QQ-plot conclusions:
+```{r}
+data %>%
+  group_by(resolution) %>%
+  shapiro_test(mission_execution_s)
+```
+As the results of the test show, p-values for both groups are higher than `0.05` reference value (`p = 0.8697` and `p = 0.5365`, respectfully), which means that we cannot reject the null-hypothesis stating that the data within both groups are normally distributed. Hereby, we conclude that the normality assumption for both groups is satisfied.
+
+## Computation
+
+Since we established that there are no extreme outliers and the data for both groups is normally distributed, we can proceed with the execution of Welch's t-test:
+```{r}
+data %>%
+  t_test(mission_execution_s ~ resolution) %>%
+  add_significance()
+```
+The resulting p-value of `0.068` is higher than `0.05` reference value for the `0.95` confidence interval. This means that the obtained p-value is not statistically significant and we cannot reject $H_0$, which states that the means of the total mission execution time for both resolution values are equal. We can hereby conclude that camera resolution parameter does not have a statistically significant effect on the total mission execution time.
+

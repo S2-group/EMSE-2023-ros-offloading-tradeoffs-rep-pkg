@@ -1,0 +1,3 @@
+"0","data %>%"
+"0","  group_by(sim_period) %>%"
+"0","  get_summary_stats(num_of_packets, type = ""mean_sd"")"

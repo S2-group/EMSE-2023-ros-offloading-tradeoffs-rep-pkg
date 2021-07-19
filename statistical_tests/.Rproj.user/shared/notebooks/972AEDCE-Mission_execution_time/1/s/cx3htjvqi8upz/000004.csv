@@ -1,0 +1,3 @@
+"0","data %>%"
+"0","  t_test(mission_execution_s ~ velocity_samples) %>%"
+"0","  add_significance()"

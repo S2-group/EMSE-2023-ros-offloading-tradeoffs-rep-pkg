@@ -1,0 +1,3 @@
+"0","data %>% "
+"0","  group_by(slam_offloaded) %>%"
+"0","  emmeans_test(avg_navigation_time_s ~ obj_recognition_offloaded, p.adjust.method = ""bonferroni"", detailed = TRUE) "

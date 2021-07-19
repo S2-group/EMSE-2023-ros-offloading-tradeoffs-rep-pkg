@@ -1,0 +1,88 @@
+---
+title: "Effect of the temporal map updates parameter on the total number of network packets"
+output:
+  html_notebook: default
+---
+
+We need to analyse the impact of two possible values for the temporal map updates on the total number of network packets. We have chosen two values for the temporal updates, namely, `off`, which is used in the primary experiments, meaning that there will be no temporal updates, and `on`, meaning that the map will be updated every `0.5s`. First, let us load the necessary libraries:
+```{r}
+if (!require('tidyverse')) install.packages('tidyverse', dependencies = TRUE); library('tidyverse')
+if (!require('ggpubr')) install.packages('ggpubr', dependencies = TRUE); library('ggpubr')
+if (!require('rstatix')) install.packages('rstatix', dependencies = TRUE); library('rstatix')
+if (!require('ggplot2')) install.packages('ggplot2', dependencies = TRUE); library('ggplot2')
+```
+
+Next, we load the raw data output of the performed experiment:
+```{r}
+data <- read.csv(file = '../../raw_data/test_temporal_updates/run_table.csv')
+data <- subset(data, select = c(X__run_id, temporal_updates, num_of_packets))
+data$temporal_updates <- as.factor(data$temporal_updates)
+data$num_of_packets <- as.numeric(data$num_of_packets)
+```
+
+Mean and standard deviation of the total number of network packets for both temporal updates values are displayed in the summary below:
+```{r}
+data %>%
+  group_by(temporal_updates) %>%
+  get_summary_stats(num_of_packets, type = "mean_sd")
+```
+
+We can visualize the distribution of the data for both temporal updates treatments via boxplot below:
+```{r}
+ggplot(data, aes(x = temporal_updates, y = num_of_packets, fill = temporal_updates)) +
+  theme_bw() + 
+  geom_boxplot(width = 0.5, outlier.size = 0.5) + 
+  geom_jitter(width = 0.2) +
+  stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5, size = 1.5) +
+  labs(x = "Temporal updates", y = "Total number of packets (#)") +
+  theme(legend.position = 'none') +
+  theme(
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
+    
+  )
+```
+
+# Welch's t-test
+
+We will apply the Welch's t-test to compare the means of both treatments. This is the default t-test in R and the safer alternative to standard Student's t-test, when we cannot assume that variances of both treatments are equal. However, we still need to check if other assumptions for applying this test are met. The first assumption of having independent observations, i.e. each subject belongs to only one group and there are no relationships between observations within the two groups, is satisfied inherently by the very way in which the experiment is conducted.
+
+## No significant outliers
+
+Next assumption that we need to check is if there are no significant outliers in neither of the two groups:
+```{r}
+data %>% 
+  group_by(temporal_updates) %>%
+  identify_outliers(num_of_packets)
+```
+
+As the result above shows, there is only one outlier, for run 20, but it is not considered extreme in terms of statistical significance. We can proceed with other assumptions.
+
+## Normality
+
+Next, we need to check if data in both groups stem from a normal distribution. To do so, we first need to draw QQ-plot for both groups:
+```{r}
+ggqqplot(data, x = "num_of_packets", facet.by = "temporal_updates")
+```
+Data points on right figure, for temporal updates `off` group, seem to be almost aligned alongside the respective reference line which means that the data is indeed normally distributed. However, we cannot claim so with a great certainty for the temporal updates `off` group on the left figure, where data seems to be scattered to an extent. We need to perform Shapiro-Wilk test for each group to check the assumptions drawn from the QQ-plots:
+```{r}
+data %>%
+  group_by(temporal_updates) %>%
+  shapiro_test(num_of_packets)
+```
+As the results of the test show, p-value for temporal updates `on` group is higher than `0.05` reference value (`p = 0.988`), but lower for temporal updates `off` group. This means that the null hypothesis of data within temporal updates `off` group being normally distributed is rejected, meaning that the normality of the data assumption is not fulfilled. We will proceed with a non-parametric alternative to the independent two samples t-test, which is Wilcoxon rank sum test.
+
+# Wilcoxon rank-sum test
+
+We can execute Wilcoxon rank-sum test without any assumptions checking:
+
+```{r}
+data %>%
+  rstatix::wilcox_test(num_of_packets ~ temporal_updates) %>%
+  add_significance()
+```
+The resulting p-value of $0.247$ is higher than `0.05` reference value for the `0.95` confidence interval. This means that the obtained p-value is not statistically significant and we cannot reject $H_0$, which states that the means of the total number of network packets for both temporal updates values are equal. We can hereby conclude that the temporal updates parameter does not have a statistically significant effect on the total number of network packets.
+
+
