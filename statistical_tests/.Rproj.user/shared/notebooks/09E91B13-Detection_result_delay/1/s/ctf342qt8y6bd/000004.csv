@@ -1,3 +1,0 @@
-"0","data %>%"
-"0","  group_by(velocity_samples) %>%"
-"0","  shapiro_test(avg_detection_result_delay_ms)"
