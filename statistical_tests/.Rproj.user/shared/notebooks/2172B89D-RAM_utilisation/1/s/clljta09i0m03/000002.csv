@@ -1,3 +1,0 @@
-"0","data %>% "
-"0","  group_by(navigation_offloaded) %>%"
-"0","  emmeans_test(avg_memory_util ~ amcl_offloaded, p.adjust.method = ""bonferroni"", detailed = TRUE)"

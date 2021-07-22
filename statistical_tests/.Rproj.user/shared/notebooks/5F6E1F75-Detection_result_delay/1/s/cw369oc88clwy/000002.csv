@@ -1,5 +1,0 @@
-"0","data_without_outliers <- data"
-"0","data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_33'),]"
-"0","data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_65'),]"
-"0","data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_1'),]"
-"0","data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_43'),]"

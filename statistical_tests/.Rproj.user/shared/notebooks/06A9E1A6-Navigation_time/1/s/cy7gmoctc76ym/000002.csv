@@ -1,3 +1,0 @@
-"0","data %>%"
-"0","  group_by(resolution) %>%"
-"0","  get_summary_stats(avg_navigation_time, type = ""mean_sd"")"

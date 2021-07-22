@@ -1,5 +1,0 @@
-"0","data <- read.csv(file = '../../raw_data/test_particles/run_table.csv')"
-"0","data$avg_memory_util <- data$avg_memory_util / 1000000"
-"0","data <- subset(data, select = c(X__run_id, particles, avg_memory_util))"
-"0","data$particles <- as.factor(data$particles)"
-"0","data$avg_memory_util <- as.numeric(data$avg_memory_util)"

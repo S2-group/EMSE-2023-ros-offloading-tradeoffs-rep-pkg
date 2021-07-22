@@ -1,3 +1,0 @@
-"0","data %>%"
-"0","  t_test(num_of_packets ~ resolution) %>%"
-"0","  add_significance()"

@@ -1,4 +1,0 @@
-"0","data <- read.csv(file = '../../raw_data/test_frame_rate/run_table.csv')"
-"0","data <- subset(data, select = c(X__run_id, frame_rate, num_of_packets))"
-"0","data$frame_rate <- as.factor(data$frame_rate)"
-"0","data$num_of_packets <- as.numeric(data$num_of_packets)"

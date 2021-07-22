@@ -1,5 +1,0 @@
-"0","data <- read.csv(file = '../../raw_data/test_resolution/run_table.csv')"
-"0","data$avg_navigation_time <- (data$avg_goal_sending_delay_ms + data$avg_goal_processing_s*1000 + data$avg_nav_result_delay_ms) / 1000"
-"0","data <- subset(data, select = c(X__run_id, resolution, avg_navigation_time))"
-"0","data$resolution <- factor(data$resolution, levels = c(""640x480"", ""1280x960""))"
-"0","data$avg_navigation_time <- as.numeric(data$avg_navigation_time)"

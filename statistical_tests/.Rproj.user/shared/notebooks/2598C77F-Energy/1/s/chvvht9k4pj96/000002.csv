@@ -1,4 +1,0 @@
-"0","data <- read.csv(file = '../../raw_data/test_particles/run_table.csv')"
-"0","data <- subset(data, select = c(X__run_id, particles, energy_J))"
-"0","data$particles <- as.factor(data$particles)"
-"0","data$energy_J <- as.numeric(data$energy_J)"

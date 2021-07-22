@@ -1,4 +1,0 @@
-"0","data_without_outliers %>%"
-"0","  group_by(amcl_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%"
-"0","  shapiro_test(num_of_packets) %>%"
-"0","  add_significance()"

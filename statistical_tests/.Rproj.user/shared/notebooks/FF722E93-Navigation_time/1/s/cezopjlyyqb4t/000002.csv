@@ -1,3 +1,0 @@
-"0","data %>%"
-"0","  t_test(avg_navigation_time ~ sim_period) %>%"
-"0","  add_significance()"

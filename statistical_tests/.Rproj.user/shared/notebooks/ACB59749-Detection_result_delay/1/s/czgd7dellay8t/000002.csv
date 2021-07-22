@@ -1,2 +1,0 @@
-"0","data_without_outliers <- data"
-"0","data_without_outliers <- data_without_outliers[!(data_without_outliers$X__run_id == 'run_77'),]"

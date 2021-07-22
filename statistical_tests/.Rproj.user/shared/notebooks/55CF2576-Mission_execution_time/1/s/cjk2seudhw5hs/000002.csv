@@ -1,6 +1,0 @@
-"0","data <- read.csv(file = '../../raw_data/known_map_experiment/run_table.csv')"
-"0","data <- subset(data, select = c(X__run_id, amcl_offloaded, navigation_offloaded, obj_recognition_offloaded, mission_execution_s))"
-"0","data$amcl_offloaded <- as.factor(data$amcl_offloaded)"
-"0","data$navigation_offloaded <- as.factor(data$navigation_offloaded)"
-"0","data$obj_recognition_offloaded <- as.factor(data$obj_recognition_offloaded)"
-"0","data$mission_execution_s <- as.numeric(data$mission_execution_s)"

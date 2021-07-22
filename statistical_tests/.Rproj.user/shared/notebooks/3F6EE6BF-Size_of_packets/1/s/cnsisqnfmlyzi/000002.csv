@@ -1,3 +1,0 @@
-"0","data %>% "
-"0","  group_by(obj_recognition_offloaded) %>%"
-"0","  emmeans_test(size_of_packets ~ navigation_offloaded, p.adjust.method = ""bonferroni"", detailed = TRUE)"
