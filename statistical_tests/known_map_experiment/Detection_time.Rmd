@@ -174,10 +174,10 @@ data %>%
 
 In the box plot below, we can see the large differences in the average object detection time when object recognition is offloaded and not. However, when we offload navigation as well, it seems that object detection time is better when localisation remains on-board:  
 ```{r}
-pdf(file = "../../figures/known_map_experiment/detection-time-1.pdf")
+#pdf(file = "../../figures/known_map_experiment/detection-time-1.pdf")
 
-facet_values <- c('false'='Object recognition\non-board',
-            'true'='Object recognition\noffloaded')
+facet_values <- c('false'='Object recognition on-board',
+            'true'='Object recognition offloaded')
 
 
 ggplot(data, aes(x = navigation_offloaded, y = avg_detection_time_ms, fill = amcl_offloaded)) +
@@ -188,15 +188,15 @@ ggplot(data, aes(x = navigation_offloaded, y = avg_detection_time_ms, fill = amc
   guides(fill=guide_legend(title="Localisation offloaded")) +
   facet_wrap(facets = ~obj_recognition_offloaded, labeller = labeller(.multi_line = TRUE, obj_recognition_offloaded = facet_values)) +
   theme(
-    axis.title.x = element_text(size = 24, family = 'sans'),
-    axis.title.y = element_text(size = 24, family = 'sans'),
-    axis.text.x = element_text(size = 20, family = 'sans'),
-    axis.text.y = element_text(size = 20, family = 'sans'),
-    legend.title = element_text(size = 20, family = 'sans'),
-    legend.text = element_text(size = 20, family = 'sans'),
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
+    legend.title = element_text(size = 12, family = 'sans'),
+    legend.text = element_text(size = 11, family = 'sans'),
     legend.position = "top",
-    strip.text = element_text(size = 20, family = 'sans')
+    strip.text = element_text(size = 11, family = 'sans')
   )
 
-dev.off()
+#dev.off()
 ```

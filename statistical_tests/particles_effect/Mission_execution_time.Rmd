@@ -31,8 +31,7 @@ We can visualize the distribution of the data for both frame particle number tre
 ```{r}
 ggplot(data, aes(x = particles, y = mission_execution_s, fill = particles)) +
   theme_bw() + 
-  geom_boxplot(width = 0.5, outlier.size = 0.5) + 
-  geom_jitter(width = 0.2) +
+  geom_boxplot(width = 0.9, outlier.size = 0.5) + 
   stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5, size = 1.5) +
   labs(x = "Number of SLAM filter particles (#)", y = "Total mission execution (s)") +
   theme(legend.position = 'none') +

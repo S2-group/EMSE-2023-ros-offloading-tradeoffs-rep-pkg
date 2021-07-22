@@ -122,7 +122,7 @@ We can see that effect of offloading object recognition is significant only when
 
 In the box plot below, we can indeed see that when SLAM is executed onboard, the average navigation time is lower when object recognition is offloaded. However, when SLAM is offloaded, offloading object recognition does not have significant effect on the average navigation time:
 ```{r}
-pdf(file = "../../figures/unknown_map_experiment/navigation-time-1.pdf")
+#pdf(file = "../../figures/unknown_map_experiment/navigation-time-1.pdf")
 
 ggplot(data, aes(x = slam_offloaded, y = avg_navigation_time_s, fill = obj_recognition_offloaded)) +
   theme_bw() + 
@@ -131,15 +131,15 @@ ggplot(data, aes(x = slam_offloaded, y = avg_navigation_time_s, fill = obj_recog
   labs(x = "SLAM offloaded", y = "Average navigation time (s)") +
   guides(fill=guide_legend(title="Obj recognition offloaded")) +
   theme(
-    axis.title.x = element_text(size = 30, family = 'sans'),
-    axis.title.y = element_text(size = 30, family = 'sans'),
-    axis.text.x = element_text(size = 28, family = 'sans'),
-    axis.text.y = element_text(size = 28, family = 'sans'),
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
     legend.position = "top",
-    legend.title = element_text(size = 22, family = 'sans'),
-    legend.text = element_text(size = 19, family = 'sans')
+    legend.title = element_text(size = 12, family = 'sans'),
+    legend.text = element_text(size = 11, family = 'sans')
   )
 
-dev.off()
+#dev.off()
 ```
 

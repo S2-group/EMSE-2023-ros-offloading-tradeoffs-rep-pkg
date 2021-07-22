@@ -29,7 +29,7 @@ data %>%
 
 We can visualize the distribution of the data for both resolution treatments via boxplot below:
 ```{r}
-pdf(file = "../../figures/resolution_effect/detection_time.pdf")
+#pdf(file = "../../figures/resolution_effect/detection_time.pdf")
 
 ggplot(data, aes(x = resolution, y = avg_detection_time_ms, fill = resolution)) +
   theme_bw() + 
@@ -38,13 +38,13 @@ ggplot(data, aes(x = resolution, y = avg_detection_time_ms, fill = resolution)) 
   labs(x = "Resolution (px)", y = "Average object\ndetection time (ms)") +
   theme(legend.position = 'none') +
   theme(
-    axis.title.x = element_text(size = 30, family = 'sans'),
-    axis.title.y = element_text(size = 30, family = 'sans'),
-    axis.text.x = element_text(size = 30, family = 'sans'),
-    axis.text.y = element_text(size = 30, family = 'sans')
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans')
   )
 
-dev.off()
+#dev.off()
 ```
 
 # Welch's t-test
@@ -94,8 +94,5 @@ We established with Welch's t-test result that camera resolution parameter has a
 data %>%
   cohens_d(avg_detection_time_ms ~ resolution)
 ```
-The resulting effect size of `d = 13.33882` is interpreted as _large_ in R, according to the Cohen's rule of thumb^[http://www.utstat.toronto.edu/~brunner/oldclass/378f16/readings/CohenPower.pdf]. According to the new and extended rules of thumb defined by Sawilowsky, the magnitude for this d-value is considered as _huge_^[https://digitalcommons.wayne.edu/cgi/viewcontent.cgi?article=1536&context=jmasm]. This is indeed clear from the distribution of data for both treatments in the boxplot above, where we can see that the average feature extraction time mean for `640x480px` resolution is `56.450 ms`, while it is `65.872 ms` for `1280x960px`. 
-
-
-
+The resulting effect size of `d = -13.33882` is interpreted as _large_ in R, according to the Cohen's rule of thumb^[http://www.utstat.toronto.edu/~brunner/oldclass/378f16/readings/CohenPower.pdf]. According to the new and extended rules of thumb defined by Sawilowsky, the magnitude for this d-value is considered as _huge_^[https://digitalcommons.wayne.edu/cgi/viewcontent.cgi?article=1536&context=jmasm]. This is indeed clear from the distribution of data for both treatments in the boxplot above, where we can see that the average feature extraction time mean for `640x480px` resolution is `56.450 ms`, while it is `65.872 ms` for `1280x960px`. 
 

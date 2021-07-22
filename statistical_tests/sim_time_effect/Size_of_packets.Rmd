@@ -30,23 +30,22 @@ data %>%
 
 We can visualize the distribution of the data for both simulation time treatments via boxplot below:
 ```{r}
-pdf(file = "../../figures/sim_time_effect/size-of-packets.pdf")
+#pdf(file = "../../figures/sim_time_effect/size-of-packets.pdf")
 
 ggplot(data, aes(x = sim_period, y = size_of_packets, fill = sim_period)) +
   theme_bw() + 
   geom_boxplot(width = 0.9, outlier.size = 0.5) + 
   stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5, size = 1.5) +
-  labs(x = "Simulation time (s)", y = "Total size of packets (B)") +
+  labs(x = "Simulation time (s)", y = "Total size of packets (MB)") +
   theme(legend.position = 'none') +
   theme(
-    axis.title.x = element_text(size = 30, family = 'sans'),
-    axis.title.y = element_text(size = 30, family = 'sans'),
-    axis.text.x = element_text(size = 28, family = 'sans'),
-    axis.text.y = element_text(size = 28, family = 'sans'),
-    
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans')
   )
 
-dev.off()
+#dev.off()
 ```
 
 # Welch's t-test

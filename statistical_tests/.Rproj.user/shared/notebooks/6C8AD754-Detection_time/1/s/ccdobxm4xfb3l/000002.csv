@@ -1,7 +1,6 @@
 "0","ggplot(data, aes(x = particles, y = avg_detection_time_ms, fill = particles)) +"
 "0","  theme_bw() + "
-"0","  geom_boxplot(width = 0.5, outlier.size = 0.5) + "
-"0","  geom_jitter(width = 0.2) +"
+"0","  geom_boxplot(width = 0.9, outlier.size = 0.5) + "
 "0","  stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5, size = 1.5) +"
 "0","  labs(x = ""Number of SLAM filter particles (#)"", y = ""Average object detection time (ms)"") +"
 "0","  theme(legend.position = 'none') +"

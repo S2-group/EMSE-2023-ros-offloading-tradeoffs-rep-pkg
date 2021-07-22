@@ -30,23 +30,22 @@ data %>%
 
 We can visualize the distribution of the data for both velocity samples treatments via boxplot below:
 ```{r}
-pdf(file = "../../figures/velocity_samples_effect/ram-utilisation.pdf")
+#pdf(file = "../../figures/velocity_samples_effect/ram-utilisation.pdf")
 
 ggplot(data, aes(x = velocity_samples, y = avg_memory_util, fill = velocity_samples)) +
   theme_bw() + 
   geom_boxplot(width = 0.9, outlier.size = 0.5) + 
   stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5, size = 1.5) +
-  labs(x = "Number of translation and\nrotation velocity samples (#)", y = "Average RAM utilisation (MB)") +
+  labs(x = "Number of translation and rotation velocity samples (#)", y = "Average RAM utilisation (MB)") +
   theme(legend.position = 'none') +
   theme(
-    axis.title.x = element_text(size = 30, family = 'sans'),
-    axis.title.y = element_text(size = 30, family = 'sans'),
-    axis.text.x = element_text(size = 28, family = 'sans'),
-    axis.text.y = element_text(size = 28, family = 'sans'),
-    
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans')
   )
 
-dev.off()
+#dev.off()
 ```
 
 # Welch's t-test

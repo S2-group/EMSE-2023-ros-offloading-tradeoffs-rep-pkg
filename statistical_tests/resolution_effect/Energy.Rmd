@@ -29,7 +29,7 @@ data %>%
 
 We can visualize the distribution of the data for both resolution treatments via boxplot below:
 ```{r}
-pdf(file = "../../figures/resolution_effect/energy.pdf")
+#pdf(file = "../../figures/resolution_effect/energy.pdf")
 
 ggplot(data, aes(x = resolution, y = energy_J, fill = resolution)) +
   theme_bw() + 
@@ -38,13 +38,13 @@ ggplot(data, aes(x = resolution, y = energy_J, fill = resolution)) +
   labs(x = "Resolution (px)", y = "Total energy consumption (J)") +
   theme(legend.position = 'none') +
   theme(
-    axis.title.x = element_text(size = 30, family = 'sans'),
-    axis.title.y = element_text(size = 30, family = 'sans'),
-    axis.text.x = element_text(size = 30, family = 'sans'),
-    axis.text.y = element_text(size = 30, family = 'sans')
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans')
   )
 
-dev.off()
+#dev.off()
 ```
 
 # Welch's t-test
@@ -94,5 +94,5 @@ We established with Welch's t-test result that camera resolution parameter has a
 data %>%
   cohens_d(energy_J ~ resolution)
 ```
-The resulting effect size of `d = 4.077121` is interpreted as _large_ in R, according to the Cohen's rule of thumb^[http://www.utstat.toronto.edu/~brunner/oldclass/378f16/readings/CohenPower.pdf]. According to the new and extended rules of thumb defined by Sawilowsky, the magnitude for this d-value is considered as _huge_^[https://digitalcommons.wayne.edu/cgi/viewcontent.cgi?article=1536&context=jmasm]. This is indeed clear from the distribution of data for both treatments in the boxplot above, where we can see that the total energy consumption mean for `640x480px` resolution is `4342.202 J`, while it is `4841.340 J` for `1280x960px`. 
+The resulting effect size of `d = -4.077121` is interpreted as _large_ in R, according to the Cohen's rule of thumb^[http://www.utstat.toronto.edu/~brunner/oldclass/378f16/readings/CohenPower.pdf]. According to the new and extended rules of thumb defined by Sawilowsky, the magnitude for this d-value is considered as _huge_^[https://digitalcommons.wayne.edu/cgi/viewcontent.cgi?article=1536&context=jmasm]. This is indeed clear from the distribution of data for both treatments in the boxplot above, where we can see that the total energy consumption mean for `640x480px` resolution is `4342.202 J`, while it is `4841.340 J` for `1280x960px`. 
 

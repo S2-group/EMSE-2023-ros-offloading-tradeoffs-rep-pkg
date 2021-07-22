@@ -29,7 +29,7 @@ data %>%
 
 We can visualize the distribution of the data for both frame rate treatments via boxplot below:
 ```{r}
-pdf(file = "../../figures/frame_rate_effect/energy.pdf")
+#pdf(file = "../../figures/frame_rate_effect/energy.pdf")
 
 ggplot(data, aes(x = frame_rate, y = energy_J, fill = frame_rate)) +
   theme_bw() + 
@@ -38,14 +38,13 @@ ggplot(data, aes(x = frame_rate, y = energy_J, fill = frame_rate)) +
   labs(x = "Frame rate (fps)", y = "Total energy consumption (J)") +
   theme(legend.position = 'none') +
   theme(
-    axis.title.x = element_text(size = 30, family = 'sans'),
-    axis.title.y = element_text(size = 30, family = 'sans'),
-    axis.text.x = element_text(size = 30, family = 'sans'),
-    axis.text.y = element_text(size = 30, family = 'sans'),
-    
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 12, family = 'sans'),
+    axis.text.y = element_text(size = 12, family = 'sans')
   )
 
-dev.off()
+#dev.off()
 ```
 
 # Welch's t-test

@@ -31,10 +31,9 @@ We can visualize the distribution of the data for both frame rate treatments via
 ```{r}
 ggplot(data, aes(x = frame_rate, y = mission_execution_s, fill = frame_rate)) +
   theme_bw() + 
-  geom_boxplot(width = 0.5, outlier.size = 0.5) + 
-  geom_jitter(width = 0.2) +
+  geom_boxplot(width = 0.9, outlier.size = 0.5) + 
   stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5, size = 1.5) +
-  labs(x = "Frame rate (fps)", y = "Total mission execution (s)") +
+  labs(x = "Frame rate (fps)", y = "Total mission execution time (s)") +
   theme(legend.position = 'none') +
   theme(
     axis.title.x = element_text(size = 12, family = 'sans'),

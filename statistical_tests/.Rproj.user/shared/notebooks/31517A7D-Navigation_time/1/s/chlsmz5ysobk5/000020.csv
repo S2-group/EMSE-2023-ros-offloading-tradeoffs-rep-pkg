@@ -1,3 +1,0 @@
-"0","data %>% "
-"0","  levene_test(avg_navigation_time_s ~ slam_offloaded*navigation_offloaded*obj_recognition_offloaded) %>%"
-"0","  add_significance()"

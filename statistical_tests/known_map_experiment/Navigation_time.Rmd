@@ -139,7 +139,7 @@ eta_squared(res.aov)
 
 Two-way ANOVA test and permutation test yielded the significant main effect when object recognition is offloaded, without interactions with the other two factors. As we can see from the box plot below, offloading object recognition seems to have statistically significant decrease on the average navigation time. The eta squared effect size for offloading navigation is $\eta^2 = 0.274$, which is considered _large_, as we can also conclude from the boxplot below:
 ```{r}
-pdf(file = "../../figures/known_map_experiment/navigation-time-1.pdf")
+#pdf(file = "../../figures/known_map_experiment/navigation-time-1.pdf")
 
 ggplot(data, aes(x = obj_recognition_offloaded, y = avg_navigation_time_s, fill = obj_recognition_offloaded)) +
   theme_bw() + 
@@ -148,11 +148,11 @@ ggplot(data, aes(x = obj_recognition_offloaded, y = avg_navigation_time_s, fill 
   labs(x = "Obj recognition offloaded", y = "Average navigation time (s)") +
   theme(legend.position = "none") +
   theme(
-    axis.title.x = element_text(size = 30, family = 'sans'),
-    axis.title.y = element_text(size = 30, family = 'sans'),
-    axis.text.x = element_text(size = 28, family = 'sans'),
-    axis.text.y = element_text(size = 28, family = 'sans')
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans')
   )
 
-dev.off()
+#dev.off()
 ```

@@ -1,3 +1,0 @@
-"0","data %>% "
-"0","  levene_test(num_of_packets ~ slam_offloaded*navigation_offloaded*obj_recognition_offloaded) %>%"
-"0","  add_significance()"

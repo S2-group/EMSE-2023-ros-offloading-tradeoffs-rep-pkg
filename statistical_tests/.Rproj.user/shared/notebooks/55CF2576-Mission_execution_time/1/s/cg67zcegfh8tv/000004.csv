@@ -1,2 +1,0 @@
-"0","data %>% levene_test(mission_execution_s ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded) %>%"
-"0","  add_significance()"

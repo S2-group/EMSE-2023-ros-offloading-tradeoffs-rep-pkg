@@ -30,8 +30,7 @@ We can visualize the distribution of the data for both temporal updates treatmen
 ```{r}
 ggplot(data, aes(x = temporal_updates, y = avg_extraction_time_ms, fill = temporal_updates)) +
   theme_bw() + 
-  geom_boxplot(width = 0.5, outlier.size = 0.5) + 
-  geom_jitter(width = 0.2) +
+  geom_boxplot(width = 0.9, outlier.size = 0.5) + 
   stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5, size = 1.5) +
   labs(x = "Temporal updates", y = "Average feature extraction time (ms)") +
   theme(legend.position = 'none') +
@@ -39,8 +38,7 @@ ggplot(data, aes(x = temporal_updates, y = avg_extraction_time_ms, fill = tempor
     axis.title.x = element_text(size = 12, family = 'sans'),
     axis.title.y = element_text(size = 12, family = 'sans'),
     axis.text.x = element_text(size = 11, family = 'sans'),
-    axis.text.y = element_text(size = 11, family = 'sans'),
-    
+    axis.text.y = element_text(size = 11, family = 'sans')
   )
 ```
 

@@ -15,7 +15,7 @@ if (!require('ggplot2')) install.packages('ggplot2', dependencies = TRUE); libra
 Next, we load the raw data output of the performed experiment:
 ```{r}
 data <- read.csv(file = '../../raw_data/test_velocity_samples/run_table.csv')
-data$avg_navigation_time_ms <- data$avg_goal_sending_delay_ms + data$avg_goal_processing_s*1000 + data$avg_nav_result_delay_ms
+data$avg_navigation_time_ms <- (data$avg_goal_sending_delay_ms + data$avg_goal_processing_s*1000 + data$avg_nav_result_delay_ms) / 1000
 data <- subset(data, select = c(X__run_id, velocity_samples, avg_navigation_time_ms))
 data$velocity_samples <- as.factor(data$velocity_samples)
 data$avg_navigation_time_ms <- as.numeric(data$avg_navigation_time_ms)
@@ -32,17 +32,15 @@ We can visualize the distribution of the data for both velocity samples treatmen
 ```{r}
 ggplot(data, aes(x = velocity_samples, y = avg_navigation_time_ms, fill = velocity_samples)) +
   theme_bw() + 
-  geom_boxplot(width = 0.5, outlier.size = 0.5) + 
-  geom_jitter(width = 0.2) +
+  geom_boxplot(width = 0.9, outlier.size = 0.5) + 
   stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5, size = 1.5) +
-  labs(x = "Number of translation and rotation velocity samples (#)", y = "Average navigation time (ms)") +
+  labs(x = "Number of translation and rotation velocity samples (#)", y = "Average navigation time (s)") +
   theme(legend.position = 'none') +
   theme(
     axis.title.x = element_text(size = 12, family = 'sans'),
     axis.title.y = element_text(size = 12, family = 'sans'),
     axis.text.x = element_text(size = 11, family = 'sans'),
-    axis.text.y = element_text(size = 11, family = 'sans'),
-    
+    axis.text.y = element_text(size = 11, family = 'sans')
   )
 ```
 

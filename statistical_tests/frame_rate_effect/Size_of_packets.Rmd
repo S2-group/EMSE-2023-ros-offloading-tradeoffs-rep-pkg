@@ -30,7 +30,7 @@ data %>%
 
 We can visualize the distribution of the data for both frame rate treatments via boxplot below:
 ```{r}
-pdf(file = "../../figures/frame_rate_effect/size-of-packets.pdf")
+#pdf(file = "../../figures/frame_rate_effect/size-of-packets.pdf")
 
 ggplot(data, aes(x = frame_rate, y = size_of_packets, fill = frame_rate)) +
   theme_bw() + 
@@ -39,14 +39,13 @@ ggplot(data, aes(x = frame_rate, y = size_of_packets, fill = frame_rate)) +
   labs(x = "Frame rate (fps)", y = "Total size of packets (MB)") +
   theme(legend.position = 'none') +
   theme(
-    axis.title.x = element_text(size = 30, family = 'sans'),
-    axis.title.y = element_text(size = 30, family = 'sans'),
-    axis.text.x = element_text(size = 30, family = 'sans'),
-    axis.text.y = element_text(size = 30, family = 'sans'),
-    
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 1, family = 'sans')
   )
 
-dev.off()
+#dev.off()
 ```
 
 # Welch's t-test

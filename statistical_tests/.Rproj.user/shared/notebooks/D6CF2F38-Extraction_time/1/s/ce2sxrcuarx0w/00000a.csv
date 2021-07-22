@@ -1,2 +1,0 @@
-"0","model  <- lm(avg_extraction_time_ms ~ amcl_offloaded*navigation_offloaded*obj_recognition_offloaded, data = data)"
-"0","ggqqplot(residuals(model))"

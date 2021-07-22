@@ -31,8 +31,7 @@ We can visualize the distribution of the data for both number of velocity sample
 ```{r}
 ggplot(data, aes(x = velocity_samples, y = avg_detection_result_delay_ms, fill = velocity_samples)) +
   theme_bw() + 
-  geom_boxplot(width = 0.5, outlier.size = 0.5) + 
-  geom_jitter(width = 0.2) +
+  geom_boxplot(width = 0.9, outlier.size = 0.5) + 
   stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5, size = 1.5) +
   labs(x = "Number of translation and rotation velocity samples (#)", y = "Average detection result delay (ms)") +
   theme(legend.position = 'none') +

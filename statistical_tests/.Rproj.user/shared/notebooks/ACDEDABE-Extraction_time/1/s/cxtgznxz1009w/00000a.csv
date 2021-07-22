@@ -1,3 +1,0 @@
-"0","data %>%"
-"0","  group_by(slam_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%"
-"0","  get_summary_stats(avg_extraction_time_ms, type = ""mean_sd"")"

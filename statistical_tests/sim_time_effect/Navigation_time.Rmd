@@ -30,7 +30,7 @@ data %>%
 
 We can visualize the distribution of the data for both simulation time treatments via boxplot below:
 ```{r}
-pdf(file = "../../figures/sim_time_effect/navigation-time.pdf")
+#pdf(file = "../../figures/sim_time_effect/navigation-time.pdf")
 
 ggplot(data, aes(x = sim_period, y = avg_navigation_time, fill = sim_period)) +
   theme_bw() + 
@@ -39,14 +39,13 @@ ggplot(data, aes(x = sim_period, y = avg_navigation_time, fill = sim_period)) +
   labs(x = "Simulation time (s)", y = "Average navigation time (s)") +
   theme(legend.position = 'none') +
   theme(
-    axis.title.x = element_text(size = 26, family = 'sans'),
-    axis.title.y = element_text(size = 26, family = 'sans'),
-    axis.text.x = element_text(size = 24, family = 'sans'),
-    axis.text.y = element_text(size = 24, family = 'sans'),
-    
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans')
   )
 
-dev.off()
+#dev.off()
 ```
 
 # Welch's t-test

@@ -29,7 +29,7 @@ data %>%
 
 We can visualize the distribution of the data for both resolution treatments via boxplot below:
 ```{r}
-pdf(file = "../../figures/resolution_effect/number-of-packets.pdf")
+#pdf(file = "../../figures/resolution_effect/number-of-packets.pdf")
 
 ggplot(data, aes(x = resolution, y = num_of_packets, fill = resolution)) +
   theme_bw() + 
@@ -38,14 +38,14 @@ ggplot(data, aes(x = resolution, y = num_of_packets, fill = resolution)) +
   labs(x = "Resolution (px)", y = "Total number of packets (#)") +
   theme(legend.position = 'none') +
   theme(
-    axis.title.x = element_text(size = 30, family = 'sans'),
-    axis.title.y = element_text(size = 30, family = 'sans'),
-    axis.text.x = element_text(size = 30, family = 'sans'),
-    axis.text.y = element_text(size = 30, family = 'sans'),
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
     
   )
 
-dev.off()
+#dev.off()
 ```
 
 # Welch's t-test
@@ -95,7 +95,7 @@ We established with Welch's t-test result that camera resolution parameter has a
 data %>%
   cohens_d(num_of_packets ~ resolution)
 ```
-The resulting effect size of `d = -4.181355` is interpreted as _large_ in R, according to the Cohen's rule of thumb^[http://www.utstat.toronto.edu/~brunner/oldclass/378f16/readings/CohenPower.pdf]. According to the new and extended rules of thumb defined by Sawilowsky, the magnitude for this d-value is considered as _huge_^[https://digitalcommons.wayne.edu/cgi/viewcontent.cgi?article=1536&context=jmasm]. This is indeed clear from the distribution of data for both treatments in the boxplot above, where we can see that the total number of network packets mean for `640x480px` resolution is `51974.4` packets, while it is `37486.1` packets for `1280x960px`. The effect size is negative since, contrary to the intuition, the results show that there are less packets transmitted over the network when the resolution is lower.
+The resulting effect size of `d = 4.181355` is interpreted as _large_ in R, according to the Cohen's rule of thumb^[http://www.utstat.toronto.edu/~brunner/oldclass/378f16/readings/CohenPower.pdf]. According to the new and extended rules of thumb defined by Sawilowsky, the magnitude for this d-value is considered as _huge_^[https://digitalcommons.wayne.edu/cgi/viewcontent.cgi?article=1536&context=jmasm]. This is indeed clear from the distribution of data for both treatments in the boxplot above, where we can see that the total number of network packets mean for `640x480px` resolution is `51974.4` packets, while it is `37486.1` packets for `1280x960px`. The effect size is negative since, contrary to the intuition, the results show that there are less packets transmitted over the network when the resolution is lower.
 
 
 

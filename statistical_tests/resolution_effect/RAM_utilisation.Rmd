@@ -30,7 +30,7 @@ data %>%
 
 We can visualize the distribution of the data for both resolution treatments via boxplot below:
 ```{r}
-pdf(file = "../../figures/resolution_effect/ram-utilisation.pdf")
+#pdf(file = "../../figures/resolution_effect/ram-utilisation.pdf")
 
 ggplot(data, aes(x = resolution, y = avg_memory_util, fill = resolution)) +
   theme_bw() + 
@@ -39,14 +39,13 @@ ggplot(data, aes(x = resolution, y = avg_memory_util, fill = resolution)) +
   labs(x = "Resolution (px)", y = "Average RAM utilisation (MB)") +
   theme(legend.position = 'none') +
   theme(
-    axis.title.x = element_text(size = 30, family = 'sans'),
-    axis.title.y = element_text(size = 30, family = 'sans'),
-    axis.text.x = element_text(size = 30, family = 'sans'),
-    axis.text.y = element_text(size = 30, family = 'sans'),
-    
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans')
   )
 
-dev.off()
+#dev.off()
 ```
 
 # Welch's t-test

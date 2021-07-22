@@ -151,7 +151,7 @@ We can see that offloading navigation has a significant effect on the total numb
 
 In the box plot below, we can indeed see that when object recognition is both offloaded and not, the total number of network packets is higher when navigation is offloaded. However, when object recognition is executed on-board, the effect of offloading navigation on the total number of packets seems much larger. Finally, if we compare the means of two groups on the left and right, when object recognition is not offloaded and offloaded, we can see that offloading object recognition does have an enormous overall effect on the total number of network packets:
 ```{r}
-pdf(file = "../../figures/unknown_map_experiment/number-of-packets-1.pdf")
+#pdf(file = "../../figures/unknown_map_experiment/number-of-packets-1.pdf")
 
 ggplot(data, aes(x = obj_recognition_offloaded, y = num_of_packets, fill = navigation_offloaded)) +
   theme_bw() + 
@@ -160,20 +160,20 @@ ggplot(data, aes(x = obj_recognition_offloaded, y = num_of_packets, fill = navig
   labs(x = "Object recognition offloaded", y = "Total number of network packets (#)") +
   guides(fill=guide_legend(title="Navigation offloaded")) +
   theme(
-    axis.title.x = element_text(size = 24, family = 'sans'),
-    axis.title.y = element_text(size = 24, family = 'sans'),
-    axis.text.x = element_text(size = 20, family = 'sans'),
-    axis.text.y = element_text(size = 18, family = 'sans'),
-    legend.title = element_text(size = 20, family = 'sans'),
-    legend.text = element_text(size = 20, family = 'sans'),
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
+    legend.title = element_text(size = 12, family = 'sans'),
+    legend.text = element_text(size = 11, family = 'sans'),
     legend.position = "top"
   )
 
-dev.off()
+#dev.off()
 ```
 Both two-way anova and permutation test yielded the significant main effect when SLAM is offloaded, without interactions with the other two factors:
 ```{r}
-pdf(file = "../../figures/unknown_map_experiment/number-of-packets-2.pdf")
+#pdf(file = "../../figures/unknown_map_experiment/number-of-packets-2.pdf")
 
 ggplot(data, aes(x = slam_offloaded, y = num_of_packets, fill = slam_offloaded)) +
   theme_bw() + 
@@ -182,16 +182,16 @@ ggplot(data, aes(x = slam_offloaded, y = num_of_packets, fill = slam_offloaded))
   labs(x = "SLAM offloaded", y = "Total number of network packets (#)") +
   theme(legend.position = "none") +
   theme(
-    axis.title.x = element_text(size = 24, family = 'sans'),
-    axis.title.y = element_text(size = 24, family = 'sans'),
-    axis.text.x = element_text(size = 20, family = 'sans'),
-    axis.text.y = element_text(size = 20, family = 'sans'),
-    legend.title = element_text(size = 20, family = 'sans'),
-    legend.text = element_text(size = 20, family = 'sans'),
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
+    legend.title = element_text(size = 12, family = 'sans'),
+    legend.text = element_text(size = 11, family = 'sans'),
     legend.position = "top"
   )
 
-dev.off()
+#dev.off()
 ```
 From the boxplot above, we can see that offloading SLAM does yield an increase in the number of network packets when SLAM is offloaded.
 

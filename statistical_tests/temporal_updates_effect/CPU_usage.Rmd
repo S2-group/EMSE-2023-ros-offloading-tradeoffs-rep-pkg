@@ -30,7 +30,7 @@ data %>%
 
 We can visualize the distribution of the data for both temporal updates treatments via boxplot below:
 ```{r}
-pdf(file = "../../figures/temporal_updates_effect/cpu-usage.pdf")
+#pdf(file = "../../figures/temporal_updates_effect/cpu-usage.pdf")
 
 ggplot(data, aes(x = temporal_updates, y = avg_cpu_util, fill = temporal_updates)) +
   theme_bw() + 
@@ -39,13 +39,13 @@ ggplot(data, aes(x = temporal_updates, y = avg_cpu_util, fill = temporal_updates
   labs(x = "Temporal updates", y = "Average CPU usage (%)") +
   theme(legend.position = 'none') +
   theme(
-    axis.title.x = element_text(size = 26, family = 'sans'),
-    axis.title.y = element_text(size = 26, family = 'sans'),
-    axis.text.x = element_text(size = 24, family = 'sans'),
-    axis.text.y = element_text(size = 24, family = 'sans')
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans')
   )
 
-dev.off()
+#dev.off()
 ```
 
 # Welch's t-test

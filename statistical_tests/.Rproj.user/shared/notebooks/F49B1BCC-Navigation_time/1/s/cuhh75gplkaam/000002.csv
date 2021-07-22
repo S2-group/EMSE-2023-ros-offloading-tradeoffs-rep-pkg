@@ -1,5 +1,5 @@
 "0","data <- read.csv(file = '../../raw_data/test_temporal_updates/run_table.csv')"
-"0","data$avg_navigation_time_ms <- data$avg_goal_sending_delay_ms + data$avg_goal_processing_s*1000 + data$avg_nav_result_delay_ms"
+"0","data$avg_navigation_time_ms <- (data$avg_goal_sending_delay_ms + data$avg_goal_processing_s*1000 + data$avg_nav_result_delay_ms) / 1000"
 "0","data <- subset(data, select = c(X__run_id, temporal_updates, avg_navigation_time_ms))"
 "0","data$temporal_updates <- as.factor(data$temporal_updates)"
 "0","data$avg_navigation_time_ms <- as.numeric(data$avg_navigation_time_ms)"

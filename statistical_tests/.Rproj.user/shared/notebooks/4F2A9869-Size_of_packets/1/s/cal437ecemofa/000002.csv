@@ -1,4 +1,5 @@
 "0","data <- read.csv(file = '../../raw_data/test_particles/run_table.csv')"
+"0","data$size_of_packets <- data$size_of_packets / 1000000"
 "0","data <- subset(data, select = c(X__run_id, particles, size_of_packets))"
 "0","data$particles <- as.factor(data$particles)"
 "0","data$size_of_packets <- as.numeric(data$size_of_packets)"

@@ -163,7 +163,7 @@ We can see that offloading navigation has a significant effect on the average RA
 
 In the box plot below, we can indeed see that when object recognition is both offloaded and not, the average RAM utilisation is lower when navigation is offloaded. However, if we compare the means of two groups on the left and right, when object recognition is not offloaded and offloaded, we can see that offloading object recognition does have an enormous overall effect on the average CPU utilisation:
 ```{r}
-pdf(file = "../../figures/known_map_experiment/ram-utilisation-1.pdf")
+#pdf(file = "../../figures/known_map_experiment/ram-utilisation-1.pdf")
 
 ggplot(data, aes(x = obj_recognition_offloaded, y = avg_memory_util, fill = navigation_offloaded)) +
   theme_bw() + 
@@ -172,14 +172,14 @@ ggplot(data, aes(x = obj_recognition_offloaded, y = avg_memory_util, fill = navi
   labs(x = "Object recognition offloaded", y = "Average RAM utilisation (MB)") +
   guides(fill=guide_legend(title="Navigation offloaded")) +
   theme(
-    axis.title.x = element_text(size = 26, family = 'sans'),
-    axis.title.y = element_text(size = 26, family = 'sans'),
-    axis.text.x = element_text(size = 26, family = 'sans'),
-    axis.text.y = element_text(size = 26, family = 'sans'),
-    legend.title = element_text(size = 20, family = 'sans'),
-    legend.text = element_text(size = 18, family = 'sans'),
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
+    legend.title = element_text(size = 12, family = 'sans'),
+    legend.text = element_text(size = 11, family = 'sans'),
     legend.position = "top"
   )
 
-dev.off()
+#dev.off()
 ```

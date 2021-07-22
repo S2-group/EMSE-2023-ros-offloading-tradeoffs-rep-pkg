@@ -1,4 +1,0 @@
-"0","data %>%"
-"0","  group_by(slam_offloaded, navigation_offloaded, obj_recognition_offloaded) %>%"
-"0","  shapiro_test(avg_detection_result_delay_ms) %>%"
-"0","  add_significance()"

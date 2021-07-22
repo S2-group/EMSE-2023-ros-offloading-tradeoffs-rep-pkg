@@ -29,7 +29,7 @@ data %>%
 
 We can visualize the distribution of the data for both frame rate treatments via boxplot below:
 ```{r}
-pdf(file = "../../figures/frame_rate_effect/detection-result-delay.pdf")
+#pdf(file = "../../figures/frame_rate_effect/detection-result-delay.pdf")
 
 ggplot(data, aes(x = frame_rate, y = avg_detection_result_delay_ms, fill = frame_rate)) +
   theme_bw() + 
@@ -38,14 +38,14 @@ ggplot(data, aes(x = frame_rate, y = avg_detection_result_delay_ms, fill = frame
   labs(x = "Frame rate (fps)", y = "Average detection\nresult delay (ms)") +
   theme(legend.position = 'none') +
   theme(
-    axis.title.x = element_text(size = 30, family = 'sans'),
-    axis.title.y = element_text(size = 30, family = 'sans'),
-    axis.text.x = element_text(size = 30, family = 'sans'),
-    axis.text.y = element_text(size = 30, family = 'sans'),
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
     
   )
 
-dev.off()
+#dev.off()
 ```
 
 # Welch's t-test

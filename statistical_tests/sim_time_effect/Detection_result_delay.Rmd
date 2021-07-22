@@ -31,8 +31,7 @@ We can visualize the distribution of the data for both simulation time treatment
 ```{r}
 ggplot(data, aes(x = sim_period, y = avg_detection_result_delay_ms, fill = sim_period)) +
   theme_bw() + 
-  geom_boxplot(width = 0.5, outlier.size = 0.5) + 
-  geom_jitter(width = 0.2) +
+  geom_boxplot(width = 0.9, outlier.size = 0.5) + 
   stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5, size = 1.5) +
   labs(x = "Simulation time (s)", y = "Average detection result delay (ms)") +
   theme(legend.position = 'none') +

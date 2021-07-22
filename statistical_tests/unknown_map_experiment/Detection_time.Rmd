@@ -152,7 +152,7 @@ We can see that offloading SLAM has a significant effect on the average object d
 
 In the box plot below, we can indeed see that when object recognition is executed onboard, the average object detection time is lower when SLAM is offloaded. However, when object recognition is offloaded, offloading SLAM does not have significant effect on the average object detection time. Finally, if we compare the means of two groups on the left and right, when object recognition is not offloaded and offloaded, we can see that offloading object recognition does have an enormous overall effect on the average object detection time:
 ```{r}
-pdf(file = "../../figures/unknown_map_experiment/detection-time-1.pdf")
+#pdf(file = "../../figures/unknown_map_experiment/detection-time-1.pdf")
 
 ggplot(data, aes(x = obj_recognition_offloaded, y = avg_detection_time_ms, fill = slam_offloaded)) +
   theme_bw() + 
@@ -161,16 +161,16 @@ ggplot(data, aes(x = obj_recognition_offloaded, y = avg_detection_time_ms, fill 
   labs(x = "Object recognition offloaded", y = "Average object detection time (ms)") +
   guides(fill=guide_legend(title="SLAM offloaded")) +
   theme(
-    axis.title.x = element_text(size = 24, family = 'sans'),
-    axis.title.y = element_text(size = 24, family = 'sans'),
-    axis.text.x = element_text(size = 20, family = 'sans'),
-    axis.text.y = element_text(size = 20, family = 'sans'),
-    legend.title = element_text(size = 20, family = 'sans'),
-    legend.text = element_text(size = 20, family = 'sans'),
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
+    legend.title = element_text(size = 12, family = 'sans'),
+    legend.text = element_text(size = 11, family = 'sans'),
     legend.position = "top"
   )
 
-dev.off()
+#dev.off()
 ```
 
 Both two-way anova and permutation test yielded the significant main effect when navigation is offloaded, without interactions with the other two factors:
@@ -179,7 +179,7 @@ Both two-way anova and permutation test yielded the significant main effect when
 
 ggplot(data, aes(x = navigation_offloaded, y = avg_detection_time_ms, fill = navigation_offloaded)) +
   theme_bw() + 
-  geom_boxplot(width = 0.5, outlier.size = 0.5) + 
+  geom_boxplot(width = 0.9, outlier.size = 0.5) + 
   stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5) +
   labs(x = "Navigation offloaded", y = "Average object detection time (ms)") +
   theme(legend.position = "none") +

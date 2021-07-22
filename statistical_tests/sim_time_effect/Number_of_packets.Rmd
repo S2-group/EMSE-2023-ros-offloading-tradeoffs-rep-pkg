@@ -29,7 +29,7 @@ data %>%
 
 We can visualize the distribution of the data for both velocity samples treatments via boxplot below:
 ```{r}
-pdf(file = "../../figures/sim_time_effect/num-of-packets.pdf")
+#pdf(file = "../../figures/sim_time_effect/num-of-packets.pdf")
 
 ggplot(data, aes(x = sim_period, y = num_of_packets, fill = sim_period)) +
   theme_bw() + 
@@ -38,14 +38,13 @@ ggplot(data, aes(x = sim_period, y = num_of_packets, fill = sim_period)) +
   labs(x = "Simulation time (s)", y = "Total number of packets (#)") +
   theme(legend.position = 'none') +
   theme(
-    axis.title.x = element_text(size = 30, family = 'sans'),
-    axis.title.y = element_text(size = 30, family = 'sans'),
-    axis.text.x = element_text(size = 28, family = 'sans'),
-    axis.text.y = element_text(size = 28, family = 'sans'),
-    
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans')
   )
 
-dev.off()
+#dev.off()
 ```
 
 # Welch's t-test

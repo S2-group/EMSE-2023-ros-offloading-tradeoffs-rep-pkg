@@ -154,7 +154,7 @@ We can see that offloading navigation has a significant effect on the total size
 
 In the box plot below, we can indeed see that when object recognition is offloaded, the total size of network packets is lower when navigation is offloaded. However, when object recognition is execution onboard, offloading navigation does not have significant effect on the total size of network packets. Finally, if we compare the means of two groups on the left and right, when object recognition is not offloaded and offloaded, we can see that offloading object recognition does have an enormous overall effect on the total size of network pakcets:
 ```{r}
-pdf(file = "../../figures/unknown_map_experiment/size-of-packets-1.pdf")
+#pdf(file = "../../figures/unknown_map_experiment/size-of-packets-1.pdf")
 
 ggplot(data, aes(x = obj_recognition_offloaded, y = size_of_packets, fill = navigation_offloaded)) +
   theme_bw() + 
@@ -163,14 +163,14 @@ ggplot(data, aes(x = obj_recognition_offloaded, y = size_of_packets, fill = navi
   labs(x = "Object recognition offloaded", y = "Total size of network packets (MB)") +
   guides(fill=guide_legend(title="Navigation offloaded")) +
   theme(
-    axis.title.x = element_text(size = 26, family = 'sans'),
-    axis.title.y = element_text(size = 26, family = 'sans'),
-    axis.text.x = element_text(size = 26, family = 'sans'),
-    axis.text.y = element_text(size = 26, family = 'sans'),
-    legend.title = element_text(size = 20, family = 'sans'),
-    legend.text = element_text(size = 18, family = 'sans'),
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
+    legend.title = element_text(size = 12, family = 'sans'),
+    legend.text = element_text(size = 11, family = 'sans'),
     legend.position = "top"
   )
 
-dev.off()
+#dev.off()
 ```

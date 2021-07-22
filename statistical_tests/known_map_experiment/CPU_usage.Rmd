@@ -159,7 +159,7 @@ We can see that offloading navigation has a significant effect on the average CP
 
 In the box plot below, we can indeed see that when object recognition is both offloaded and not, the average CPU usage is lower when localisation is offloaded. However, if we compare the means of two groups on the left and right, when object recognition is not offloaded and offloaded, we can see that offloading object recognition does have an enormous overall effect on the average CPU usage:
 ```{r}
-pdf(file = "../../figures/known_map_experiment/cpu-usage-1.pdf")
+#pdf(file = "../../figures/known_map_experiment/cpu-usage-1.pdf")
 
 ggplot(data, aes(x = obj_recognition_offloaded, y = avg_cpu_util, fill = amcl_offloaded)) +
   theme_bw() + 
@@ -168,21 +168,21 @@ ggplot(data, aes(x = obj_recognition_offloaded, y = avg_cpu_util, fill = amcl_of
   labs(x = "Object recognition offloaded", y = "Average CPU usage (%)") +
   guides(fill=guide_legend(title="Localisation offloaded")) +
   theme(
-    axis.title.x = element_text(size = 26, family = 'sans'),
-    axis.title.y = element_text(size = 26, family = 'sans'),
-    axis.text.x = element_text(size = 26, family = 'sans'),
-    axis.text.y = element_text(size = 26, family = 'sans'),
-    legend.title = element_text(size = 20, family = 'sans'),
-    legend.text = element_text(size = 18, family = 'sans'),
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
+    legend.title = element_text(size = 12, family = 'sans'),
+    legend.text = element_text(size = 11, family = 'sans'),
     legend.position = "top"
   )
 
-dev.off()
+#dev.off()
 ```
 
 Similarly, in the box plot below, we can see that when object recognition is both offloaded and not, the average CPU usage is lower when navigation is offloaded. However, if we compare the means of two groups on the left and right, when object recognition is not offloaded and offloaded, we can see that offloading object recognition does have an enormous overall effect on the average CPU usage:
 ```{r}
-pdf(file = "../../figures/known_map_experiment/cpu-usage-2.pdf")
+#pdf(file = "../../figures/known_map_experiment/cpu-usage-2.pdf")
 
 ggplot(data, aes(x = obj_recognition_offloaded, y = avg_cpu_util, fill = navigation_offloaded)) +
   theme_bw() + 
@@ -191,15 +191,15 @@ ggplot(data, aes(x = obj_recognition_offloaded, y = avg_cpu_util, fill = navigat
   labs(x = "Object recognition offloaded", y = "Average CPU usage (%)") +
   guides(fill=guide_legend(title="Navigation offloaded")) +
   theme(
-    axis.title.x = element_text(size = 26, family = 'sans'),
-    axis.title.y = element_text(size = 26, family = 'sans'),
-    axis.text.x = element_text(size = 26, family = 'sans'),
-    axis.text.y = element_text(size = 26, family = 'sans'),
-    legend.title = element_text(size = 20, family = 'sans'),
-    legend.text = element_text(size = 18, family = 'sans'),
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans'),
+    legend.title = element_text(size = 12, family = 'sans'),
+    legend.text = element_text(size = 11, family = 'sans'),
     legend.position = "top"
   )
 
-dev.off()
+#dev.off()
 ```
 Even though CPU usage is lower when navigation is offloaded, the boxplot above shows that the improvement is not that significant. 

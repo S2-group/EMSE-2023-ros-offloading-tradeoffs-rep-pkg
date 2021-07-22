@@ -31,7 +31,7 @@ We can visualize the distribution of the data for both resolution treatments via
 ```{r}
 ggplot(data, aes(x = resolution, y = mission_execution_s, fill = resolution)) +
   theme_bw() + 
-  geom_boxplot(width = 0.5, outlier.size = 0.5) + 
+  geom_boxplot(width = 0.9, outlier.size = 0.5) + 
   stat_summary(fun = mean, color = 'black', geom = 'point', shape = 5, size = 1.5) +
   labs(x = "Resolution (px)", y = "Total mission execution (s)") +
   theme(legend.position = 'none') +
@@ -39,8 +39,7 @@ ggplot(data, aes(x = resolution, y = mission_execution_s, fill = resolution)) +
     axis.title.x = element_text(size = 12, family = 'sans'),
     axis.title.y = element_text(size = 12, family = 'sans'),
     axis.text.x = element_text(size = 11, family = 'sans'),
-    axis.text.y = element_text(size = 11, family = 'sans'),
-    
+    axis.text.y = element_text(size = 11, family = 'sans')
   )
 ```
 

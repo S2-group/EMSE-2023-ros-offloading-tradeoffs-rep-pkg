@@ -137,7 +137,7 @@ eta_squared(res.aov)
 
 Both two-way anova and permutation test yielded the significant main effect when object recognition is offloaded, without interactions with the other two factors:
 ```{r}
-pdf(file = "../../figures/unknown_map_experiment/detection-result-delay-1.pdf")
+#pdf(file = "../../figures/unknown_map_experiment/detection-result-delay-1.pdf")
 
 ggplot(data, aes(x = obj_recognition_offloaded, y = avg_detection_result_delay_ms, fill = obj_recognition_offloaded)) +
   theme_bw() + 
@@ -146,12 +146,12 @@ ggplot(data, aes(x = obj_recognition_offloaded, y = avg_detection_result_delay_m
   labs(x = "Object recognition offloaded", y = "Average detection\nresult delay (ms)") +
   theme(legend.position = "none") +
   theme(
-    axis.title.x = element_text(size = 30, family = 'sans'),
-    axis.title.y = element_text(size = 30, family = 'sans'),
-    axis.text.x = element_text(size = 30, family = 'sans'),
-    axis.text.y = element_text(size = 30, family = 'sans')
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans')
   )
 
-dev.off()
+#dev.off()
 ```
 We can indeed see from the boxplot above that the result delay is much higher when object recognition is offloaded.

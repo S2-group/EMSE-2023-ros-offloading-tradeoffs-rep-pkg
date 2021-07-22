@@ -105,7 +105,7 @@ eta_squared(res.aov)
 
 Two-way ANOVA test yielded the significant main effect when navigation is offloaded, without interactions with the other two factors. As we can see from the box plot below, offloading navigation seems to have statistically significant increase in the total mission execution time. The eta squared effect size for offloading navigation is $\eta^2 = 0.0577$, which is interpreted as _medium_ according to the rule of thumb:
 ```{r}
-pdf(file = "../../figures/unknown_map_experiment/mission-execution-time-1.pdf")
+#pdf(file = "../../figures/unknown_map_experiment/mission-execution-time-1.pdf")
 
 ggplot(data, aes(x = navigation_offloaded, y = mission_execution_s, fill = navigation_offloaded)) +
   theme_bw() + 
@@ -114,17 +114,17 @@ ggplot(data, aes(x = navigation_offloaded, y = mission_execution_s, fill = navig
   labs(x = "Navigation offloaded", y = "Total mission execution time (s)") +
   theme(legend.position = "none") +
   theme(
-    axis.title.x = element_text(size = 30, family = 'sans'),
-    axis.title.y = element_text(size = 30, family = 'sans'),
-    axis.text.x = element_text(size = 28, family = 'sans'),
-    axis.text.y = element_text(size = 28, family = 'sans')
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans')
   )
 
-dev.off()
+#dev.off()
 ```
 Two-way ANOVA test also yielded the significant main effect when object recognition is offloaded. As we can see from the box plot below, offloading object recognition seems to have statistically significant decrease on the total mission execution time, as opposed to navigation offloading. The eta squared effect size for offloading object recogntion is $\eta^2 = 0.0591$, which is interpreted as _medium_ according to the rule of thumb:
 ```{r}
-pdf(file = "../../figures/unknown_map_experiment/mission-execution-time-2.pdf")
+#pdf(file = "../../figures/unknown_map_experiment/mission-execution-time-2.pdf")
 
 ggplot(data, aes(x = obj_recognition_offloaded, y = mission_execution_s, fill = obj_recognition_offloaded)) +
   theme_bw() + 
@@ -133,13 +133,13 @@ ggplot(data, aes(x = obj_recognition_offloaded, y = mission_execution_s, fill = 
   labs(x = "Object recognition offloaded", y = "Total mission execution time (s)") +
   theme(legend.position = "none") +
   theme(
-    axis.title.x = element_text(size = 30, family = 'sans'),
-    axis.title.y = element_text(size = 30, family = 'sans'),
-    axis.text.x = element_text(size = 28, family = 'sans'),
-    axis.text.y = element_text(size = 28, family = 'sans')
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans')
   )
 
-dev.off()
+#dev.off()
 ```
 
 

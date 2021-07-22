@@ -30,7 +30,7 @@ data %>%
 
 We can visualize the distribution of the data for both frame particle number treatments via boxplot below:
 ```{r}
-pdf(file = "../../figures/particles_effect/ram-utilisation.pdf")
+#pdf(file = "../../figures/particles_effect/ram-utilisation.pdf")
 
 ggplot(data, aes(x = particles, y = avg_memory_util, fill = particles)) +
   theme_bw() + 
@@ -39,13 +39,13 @@ ggplot(data, aes(x = particles, y = avg_memory_util, fill = particles)) +
   labs(x = "Number of SLAM filter particles (#)", y = "Average RAM utilisation (MB)") +
   theme(legend.position = 'none') +
   theme(
-    axis.title.x = element_text(size = 26, family = 'sans'),
-    axis.title.y = element_text(size = 26, family = 'sans'),
-    axis.text.x = element_text(size = 24, family = 'sans'),
-    axis.text.y = element_text(size = 24, family = 'sans')
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans')
   )
 
-dev.off()
+#dev.off()
 ```
 
 # Welch's t-test

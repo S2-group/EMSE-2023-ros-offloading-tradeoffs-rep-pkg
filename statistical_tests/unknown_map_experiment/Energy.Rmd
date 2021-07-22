@@ -105,7 +105,7 @@ eta_squared(res.aov)
 
 Two-way ANOVA test yielded the significant main effect when navigation is offloaded, without interactions with the other two factors. As we can see from the box plot below, offloading navigation seems to have statistically significant increase on the total energy consumption. However, the generalized eta squared effect size for offloading navigation is $\eta^2 = 0.062$, which means that `6.2%` of the change in total energy consumption can be accounted for navigation offloading. We can also conclude from the boxplot below that the magnitude of that change is indeed minor:
 ```{r}
-pdf(file = "../../figures/unknown_map_experiment/energy-1.pdf")
+#pdf(file = "../../figures/unknown_map_experiment/energy-1.pdf")
 
 ggplot(data, aes(x = navigation_offloaded, y = energy_J, fill = navigation_offloaded)) +
   theme_bw() + 
@@ -114,17 +114,17 @@ ggplot(data, aes(x = navigation_offloaded, y = energy_J, fill = navigation_offlo
   labs(x = "Navigation offloaded", y = "Energy (J)") +
   theme(legend.position = "none") +
   theme(
-    axis.title.x = element_text(size = 30, family = 'sans'),
-    axis.title.y = element_text(size = 30, family = 'sans'),
-    axis.text.x = element_text(size = 28, family = 'sans'),
-    axis.text.y = element_text(size = 28, family = 'sans')
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans')
   )
 
-dev.off()
+#dev.off()
 ```
 Two-way ANOVA test also yielded the significant main effect when object recognition is offloaded. As we can see from the box plot below, offloading object recognition seems to have statistically significant decrease on the total energy consumption, as opposed to navigation offloading. The generalized eta squared effect size for offloading navigation is $\eta^2 = 0.810$, which means that `81.0%` of the change in total energy consumption can be accounted for object recognition offloading:
 ```{r}
-pdf(file = "../../figures/unknown_map_experiment/energy-2.pdf")
+#pdf(file = "../../figures/unknown_map_experiment/energy-2.pdf")
 
 ggplot(data, aes(x = obj_recognition_offloaded, y = energy_J, fill = obj_recognition_offloaded)) +
   theme_bw() + 
@@ -133,12 +133,12 @@ ggplot(data, aes(x = obj_recognition_offloaded, y = energy_J, fill = obj_recogni
   labs(x = "Object recognition offloaded", y = "Energy (J)") +
   theme(legend.position = "none") +
   theme(
-    axis.title.x = element_text(size = 30, family = 'sans'),
-    axis.title.y = element_text(size = 30, family = 'sans'),
-    axis.text.x = element_text(size = 28, family = 'sans'),
-    axis.text.y = element_text(size = 28, family = 'sans')
+    axis.title.x = element_text(size = 12, family = 'sans'),
+    axis.title.y = element_text(size = 12, family = 'sans'),
+    axis.text.x = element_text(size = 11, family = 'sans'),
+    axis.text.y = element_text(size = 11, family = 'sans')
   )
 
-dev.off()
+#dev.off()
 ```
 
