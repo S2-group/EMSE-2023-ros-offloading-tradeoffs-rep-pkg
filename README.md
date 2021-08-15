@@ -5,7 +5,7 @@ of computation offloading strategies in ROS-based systems. The experiments are c
 
 The repository consists of three main directories:
 - **figures**: bar chart figures in *pdf* format created as outputs of data analysis. All figures in this direcotory are imported in the thesis paper, where they are thoroughly explained;
-- **raw_data**: raw outputs of the experiments in *csv* format. The entire content of this direcotory is the direct output of the experiment conducted via the Robot Runner experiment orchestration tool;
+- **raw_data**: raw outputs of the experiments in *csv* format. The entire content of this direcotory is the direct output of the experiment conducted via the Robot Runner experiment orchestration tool. For tool configuration and further details, the reader is referred to [this](https://github.com/minana96/robot-runner) GitHub repository;
 - **statistical_tests**: R project containing the source code of R markdown notebooks in *Rmd* format, along with the HTML visualisation of the notebooks in 
 *nb.html* format. Notebooks document the complete data analysis process and the R source code used for statistical analysis. The analysis is conducted with R version 4.1.1 on Ubuntu 18.04.5.
 
@@ -53,7 +53,7 @@ As noted above, each subdirectory in *raw_data* directory contains raw *Robot Ru
      |--- run_table.csv                                 Aggregated experiment results
 
 
-Outputs of the independent experiment runs are contained within dedicated folders (*run_1* to *run_<n>*, whereas n stands for 80 in *unknown_map_experiment* and *known_map_experiment*, but 20 in *resolution_effect*, *frame_rate_effect*, *particles_effect*, *temporal_updates_effect*, *velocity_samples_effect* and *sim_time_effect* experiments). Each run directory contains outputs of five different profilers in *csv* format. For further details regarding profilers and their purpose, the reader is referred to [this GitHub repository](). The aggregated results per experiment run are represented within *run_table.csv* file. The statistical data analysis is conducted on the results in *run_table.csv* file for each respective experiment.
+Outputs of the independent experiment runs are contained within dedicated folders (*run_1* to *run_<n>*, whereas n stands for 80 in *unknown_map_experiment* and *known_map_experiment*, but 20 in *resolution_effect*, *frame_rate_effect*, *particles_effect*, *temporal_updates_effect*, *velocity_samples_effect* and *sim_time_effect* experiments). Each run directory contains outputs of five different profilers in *csv* format. For further details regarding profilers and their purpose, the reader is referred to [this](https://github.com/minana96/robot-runner) GitHub repository. The aggregated results per experiment run are represented within *run_table.csv* file. The statistical data analysis is conducted on the results in *run_table.csv* file for each respective experiment.
   
 ## Data analysis
   
