@@ -1,10 +1,10 @@
 # Empirical Evaluation of Computation Offloading Strategies in Robotic Systems
 
 This repository contains raw data outputs and complete data analysis of the results obtained in the empirical experiments conducted with the purpose of evaluation 
-of computation offloading strategies in ROS-based systems. The experiments are conducted as a part of a Computer Science MSc thesis at Vrije Universiteit Amsterdam.
+of computation offloading strategies in ROS-based systems. 
 
 The repository consists of three main directories:
-- **figures**: bar chart figures in *pdf* format created as outputs of data analysis. All figures in this direcotory are imported in the thesis paper, where they are thoroughly explained;
+- **figures**: bar chart figures in *pdf* format created as outputs of data analysis. All figures in this direcotory are imported in the paper, where they are thoroughly explained;
 - **raw_data**: raw outputs of the experiments in *csv* format. The entire content of this direcotory is the direct output of the experiment conducted via the Robot Runner experiment orchestration tool. For tool configuration and further details, the reader is referred to [this](https://github.com/minana96/robot-runner) GitHub repository;
 - **statistical_tests**: R project containing the source code of R markdown notebooks in *Rmd* format, along with the HTML visualisation of the notebooks in 
 *nb.html* format. Notebooks document the complete data analysis process and the R source code used for statistical analysis. The analysis is conducted with R version 4.1.1 on Ubuntu 18.04.5.
