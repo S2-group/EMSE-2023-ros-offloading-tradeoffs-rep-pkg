@@ -9,16 +9,15 @@ If the dataset and/or scripts in this repo are helping your research, consider t
 
 ```
 @article{EMSE_2023,
-  title={{Computation Offloading for Ground Robotic Systems
-Communicating over WiFi - An Empirical Exploration
-on Performance and Energy Trade-offs}},
+  title={{Computation Offloading for Ground Robotic Systems Communicating over WiFi - An Empirical Exploration on Performance and Energy Trade-offs}},
   author={Milica Dordevic and Michel Albonico and Grace Lewis and Ivano Malavolta and Patricia Lago},
   volume = {-},
   number = {-},
   pages = {To appear},
   year={2023},
   publisher={Springer},
-  url = {https://www.ivanomalavolta.com/files/papers/EMSE_2023.pdf}
+  journal={Empirical Software Engineering},
+  url = {http://www.ivanomalavolta.com/files/papers/EMSE_2023.pdf}
 }
 ```
 
