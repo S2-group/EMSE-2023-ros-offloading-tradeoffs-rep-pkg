@@ -1,7 +1,26 @@
 # Empirical Evaluation of Computation Offloading Strategies in Robotic Systems
 
-This repository contains raw data outputs and complete data analysis of the results obtained in the empirical experiments conducted with the purpose of evaluation 
-of computation offloading strategies in ROS-based systems. 
+This repository contains raw data outputs and complete data analysis of the results obtained in the empirical experiments conducted with the purpose of evaluation of computation offloading strategies in ROS-based systems. 
+
+The scientific paper presenting extensive details about the design and results of this study is available here: [EMSE 2023 publication](https://www.ivanomalavolta.com/files/papers/EMSE_2023.pdf).
+
+## How to cite the dataset
+If the dataset and/or scripts in this repo are helping your research, consider to cite our study as follows, thanks!
+
+```
+@article{EMSE_2023,
+  title={{Computation Offloading for Ground Robotic Systems
+Communicating over WiFi - An Empirical Exploration
+on Performance and Energy Trade-offs}},
+  author={Milica Dordevic and Michel Albonico and Grace Lewis and Ivano Malavolta and Patricia Lago},
+  volume = {-},
+  number = {-},
+  pages = {To appear},
+  year={2023},
+  publisher={Springer},
+  url = {https://www.ivanomalavolta.com/files/papers/EMSE_2023.pdf}
+}
+```
 
 The repository consists of three main directories:
 - **figures**: bar chart figures in *pdf* format created as outputs of data analysis. All figures in this direcotory are imported in the paper, where they are thoroughly explained;
